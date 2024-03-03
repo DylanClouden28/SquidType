@@ -1,9 +1,17 @@
 package main
 
 import (
-	"fmt"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	fmt.Print("Greetings, Christopher Potts")
+	r := gin.Default()
+
+	r.GET("/", func(c *gin.Context) {
+		c.String(http.StatusOK, "Hello, Christopher Potts")
+	})
+
+	r.Run(":8000")
 }
