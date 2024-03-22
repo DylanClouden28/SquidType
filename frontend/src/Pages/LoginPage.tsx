@@ -1,8 +1,6 @@
 import { useState} from 'react'
 
 function App() {
-  const [count, setCount] = useState(0)
-
   const [loginForm, setLoginForm] = useState({
     username: '',
     password: '',
