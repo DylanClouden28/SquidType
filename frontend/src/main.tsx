@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App.tsx'
+import LoginPage from './Pages/LoginPage.tsx'
 import {
   createBrowserRouter,
   RouterProvider,
@@ -10,7 +10,11 @@ import './index.css'
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <App />,
+    element: <LoginPage />,
+  },
+  {
+    path: "/home",
+    element: <h1>Hello to the home page</h1>,
   },
 ]);
 
