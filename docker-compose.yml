@@ -5,8 +5,8 @@ services:
   go:
     build: ./backend/
     ports:
-      - "8080:8080"
+      - "8000:8000"
   react:
     build: ./frontend
     ports:
-      - "3000"
+      - "8080:4173"
