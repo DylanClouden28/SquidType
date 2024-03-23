@@ -29,12 +29,12 @@ function App() {
   }
 
   return (
-    <>
+    <div data-theme="night">
     <div className="hero min-h-screen bg-base-200 justify-center">
       <div className="hero-content flex-col lg:flex-row-reverse">
         <div className="text-center lg:text-left">
-          <h1 className="text-5xl font-bold">Login now!</h1>
-          <p className='text-3xl font-bold'>Don't have account   <button onClick={signUpScroll} className='text-accent text-5xl underline font-bold italic hover:text-accent'>Sign Up!</button></p>
+          <h1 className="text-5xl font-bold text-primary">Login now!</h1>
+          <p className='text-3xl font-bold'>Don't have account   <button onClick={signUpScroll} className='btn btn-lg btn-outline btn-accent text-5xl font-bold italic '>Sign Up!</button></p>
         </div>
         <div className="card shrink-0 w-full max-w-sm shadow-2xl bg-base-100">
           <form className="card-body">
@@ -116,7 +116,7 @@ function App() {
     </div>
     </div>
   </div>
-  </>
+  </div>
   )
 }
 

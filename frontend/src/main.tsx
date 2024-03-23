@@ -1,6 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import LoginPage from './Pages/LoginPage.tsx'
+import LoginPage from './Pages/loginPage.tsx'
+import HomePage from './Pages/homePage.tsx'
 import {
   createBrowserRouter,
   RouterProvider,
@@ -14,7 +15,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/home",
-    element: <h1>Hello to the home page</h1>,
+    element: <HomePage/>,
   },
 ]);
 
