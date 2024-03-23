@@ -3,8 +3,9 @@ package main
 import (
 	//"net/http"
 	"context"
-	"github.com/gin-gonic/gin"
 	"sluggers/controller"
+
+	"github.com/gin-gonic/gin"
 
 	//"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -13,7 +14,7 @@ import (
 
 var client *mongo.Client
 
-func collection(collection string) *mongo.Collection {
+func Collection(collection string) *mongo.Collection {
 	return client.Database("whateversFine").Collection(collection)
 }
 
