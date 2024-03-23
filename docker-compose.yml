@@ -1,0 +1,12 @@
+version: '3'
+services:
+  mongo:
+    image: mongo:4.2.5
+  go:
+    build: ./backend/
+    ports:
+      - "8080:8080"
+  react:
+    build: ./frontend
+    ports:
+      - "3000"
