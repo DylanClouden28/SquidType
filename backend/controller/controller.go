@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"sluggers/models"
-
 	"github.com/gin-gonic/gin"
+	"sluggers/database"
+	"sluggers/models"
 )
 
 func Route(router *gin.Engine) {
@@ -20,7 +20,7 @@ func login(c *gin.Context) {
 
 func register(c *gin.Context) {
 	var newUser models.User
-	userCollection := 
+	userCollection := database.Collection("collection")
 
 	err := c.BindJSON(&newUser)
 	if err != nil {
