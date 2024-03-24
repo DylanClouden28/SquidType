@@ -69,7 +69,11 @@ func login(c *gin.Context) {
 		return
 	}
 	success := bcrypt.CompareHashAndPassword([]byte(loginAs.Password), []byte(userLogin.Password))
+	bcrypt.Comp
 	if success != nil {
+		fmt.Println("success err", success)
+		fmt.Println("logging into:", loginAs)
+		fmt.Println("logging in with:", userLogin)
 		c.JSON(400, "Incorrect passowrd")
 		return
 	}
@@ -96,26 +100,35 @@ func login(c *gin.Context) {
 
 }
 
-type passwords struct {
-	Password1 string `json:"password1"`
-	Password2 string `json:"password2"`
-}
-
 func register(c *gin.Context) {
 	var newUser models.User
 	userCollection := database.Collection("users")
 
-	err := c.BindJSON(&newUser)
+	var jsonData map[string]interface{}
+	err := c.BindJSON(&jsonData)
+	fmt.Println("json:", jsonData)
+	fmt.Println("usr", jsonData["username"])
 	if err != nil {
 		c.JSON(400, "Bad JSON")
 		fmt.Println(err)
 		return
 	}
-	// fmt.Println("usr", newUser, newUser.Username, "name")
+	value, exists := jsonData["username"]
+	if !exists {
+		c.JSON(400, "username error")
+		return
+	}
+	if jsonData["password1"] != jsonData["password2"] {
+		c.JSON(400, "Passwords do not match")
+		return
+	}
+	newUser.Username = value.(string)
 	filter := bson.D{{"username", newUser.Username}}
-	exists := userCollection.FindOne(context.TODO(), filter).Decode(nil)
-	if exists == nil {
-		print(exists)
+	var existing_user models.User
+	exist := userCollection.FindOne(context.TODO(), filter).Decode(&existing_user)
+	count, _ := userCollection.CountDocuments(context.TODO(), bson.D{})
+	if exist == nil && count != 0 {
+		fmt.Println("usr exists err", exists, "count", count)
 		c.JSON(400, "User already exists")
 		return
 	}
@@ -126,16 +139,7 @@ func register(c *gin.Context) {
 	}
 
 	newUser.Password = string(hash)
-	var password passwords
-	p_err := c.BindJSON(&password)
-	if p_err != nil {
-		c.JSON(400, "Error getting passwords")
-		return
-	}
-	if password.Password1 != password.Password2 {
-		c.JSON(400, "Passwords do not match")
-		return
-	}
+	fmt.Println(newUser)
 
 	_, ins_err := userCollection.InsertOne(context.TODO(), newUser)
 	if ins_err != nil {
@@ -143,5 +147,5 @@ func register(c *gin.Context) {
 		fmt.Println(ins_err)
 		return
 	}
-	// c.JSON(200, "success")
+	c.JSON(200, "success")
 }
