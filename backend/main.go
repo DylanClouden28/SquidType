@@ -12,11 +12,10 @@ import (
 
 func main() {
 	r := gin.Default()
-	controller.Route(r)
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"https://localhost:8080"},
+		AllowOrigins:     []string{"http://localhost:8080"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"},
-		AllowHeaders:     []string{"Origin"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 		AllowOriginFunc: func(origin string) bool {
@@ -25,5 +24,6 @@ func main() {
 		},
 		MaxAge: 12 * time.Hour,
 	}))
+	controller.Route(r)
 	r.Run(":8000")
 }
