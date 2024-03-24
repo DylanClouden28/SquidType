@@ -114,7 +114,8 @@ func register(c *gin.Context) {
 	// fmt.Println("usr", newUser, newUser.Username, "name")
 	filter := bson.D{{"username", newUser.Username}}
 	exists := userCollection.FindOne(context.TODO(), filter).Decode(nil)
-	if exists != nil {
+	if exists == nil {
+		print(exists)
 		c.JSON(400, "User already exists")
 		return
 	}
