@@ -70,9 +70,6 @@ func login(c *gin.Context) {
 	}
 	success := bcrypt.CompareHashAndPassword([]byte(loginAs.Password), []byte(userLogin.Password))
 	if success != nil {
-		fmt.Println("success err", success)
-		fmt.Println("logging into:", loginAs)
-		fmt.Println("logging in with:", userLogin)
 		c.JSON(400, "Incorrect passowrd")
 		return
 	}
@@ -105,11 +102,8 @@ func register(c *gin.Context) {
 
 	var jsonData map[string]interface{}
 	err := c.BindJSON(&jsonData)
-	fmt.Println("json:", jsonData)
-	fmt.Println("usr", jsonData["username"])
 	if err != nil {
 		c.JSON(400, "Bad JSON")
-		fmt.Println(err)
 		return
 	}
 	value, exists := jsonData["username"]
@@ -122,29 +116,25 @@ func register(c *gin.Context) {
 		return
 	}
 	newUser.Username = value.(string)
-	newUser.Password = jsonData["password1"].(string)
 	filter := bson.D{{"username", newUser.Username}}
 	var existing_user models.User
 	exist := userCollection.FindOne(context.TODO(), filter).Decode(&existing_user)
 	count, _ := userCollection.CountDocuments(context.TODO(), bson.D{})
 	if exist == nil && count != 0 {
-		fmt.Println("usr exists err", exists, "count", count)
 		c.JSON(400, "User already exists")
 		return
 	}
-	hash, hash_err := bcrypt.GenerateFromPassword([]byte(newUser.Password), bcrypt.DefaultCost)
+	hash, hash_err := bcrypt.GenerateFromPassword([]byte(jsonData["password1"].(string)), bcrypt.DefaultCost)
 	if hash_err != nil {
 		c.JSON(400, "Error hashing password(?)")
 		return
 	}
 
 	newUser.Password = string(hash)
-	fmt.Println(newUser)
 
 	_, ins_err := userCollection.InsertOne(context.TODO(), newUser)
 	if ins_err != nil {
 		c.JSON(400, "Error creating user")
-		fmt.Println(ins_err)
 		return
 	}
 	c.JSON(200, "success")
