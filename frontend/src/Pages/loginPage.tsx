@@ -1,4 +1,6 @@
 import { useState} from 'react'
+import { useNavigate } from 'react-router-dom';
+
 
 function App() {
   const [loginForm, setLoginForm] = useState({
@@ -14,6 +16,7 @@ function App() {
 
   const [isAlertLogin, setAlertLogin] = useState("");
   const [isAlertSignup, setAlertSignup] = useState("");
+  const nav = useNavigate()
 
   const closeAlert = (func: React.Dispatch<React.SetStateAction<string>>) => {
     func("");
@@ -28,6 +31,48 @@ function App() {
     Element.scrollIntoView({behavior: "smooth"})
   }
 
+  const tryLogin = async () => {
+    try{
+      const response = await fetch("http://localhost:8000/login", {
+        method: "POST",
+        body: JSON.stringify({
+          username: loginForm.username,
+          password: loginForm.password 
+        })
+      })
+      if (!response.ok){
+        const {err} = await response.json()
+        setAlertLogin(err || 'Error with logging in')
+      }
+      nav('/home')
+      
+    } catch (error){
+      setAlertLogin("Error with logging in asdasd")
+    }
+  }
+
+  const tryRegister = async () => {
+    try{
+      const response = await fetch("http://localhost:8000/register", {
+        method: "POST",
+        body: JSON.stringify({
+          username: signUpForm.username,
+          password1: signUpForm.password1,
+          password2: signUpForm.password2,
+        }),
+        mode: "cors"
+      })
+      if (!response.ok){
+        const {err} = await response.json()
+        setAlertSignup(err || 'Error with creating account')
+      }
+
+
+    } catch (error){
+      setAlertSignup("Error with creating account")
+    }
+  }
+
   return (
     <div data-theme="night">
     <div className="hero min-h-screen bg-base-200 justify-center">
@@ -37,7 +82,7 @@ function App() {
           <p className='text-3xl font-bold'>Don't have account   <button onClick={signUpScroll} className='btn btn-lg btn-outline btn-accent text-5xl font-bold italic '>Sign Up!</button></p>
         </div>
         <div className="card shrink-0 w-full max-w-sm shadow-2xl bg-base-100">
-          <form className="card-body">
+          <div className="card-body">
             {isAlertLogin.length !== 0 && 
             <div role="alert" className="alert alert-warning">
               <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
@@ -63,9 +108,9 @@ function App() {
               <input onChange={e => setLoginForm({username: loginForm.username, password: e.target.value})} value={loginForm.password} type="password" placeholder="password" className="input input-bordered" required />
             </div>
             <div className="form-control mt-6">
-              <button className="btn btn-primary">Login</button>
+              <button onClick={tryLogin} className="btn btn-primary">Login</button>
             </div>
-          </form>
+          </div>
         </div>
     </div>
   </div>
@@ -78,7 +123,7 @@ function App() {
           <p className='text-3xl font-bold'>Please sign up with the form</p>
         </div>
         <div className="card shrink-0 w-full max-w-sm shadow-2xl bg-base-100">
-          <form className="card-body">
+          <div className="card-body">
           {isAlertSignup.length !== 0 && 
             <div role="alert" className="alert alert-warning">
               <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
@@ -109,9 +154,9 @@ function App() {
               <input onChange={e => setSignUpForm({username: signUpForm.username, password1: signUpForm.password1, password2: e.target.value})} value={signUpForm.password2} type="password" placeholder="password" className="input input-bordered" required />
             </div>
             <div className="form-control mt-6">
-              <button className="btn btn-primary">Login</button>
+              <button onClick={tryRegister} className="btn btn-primary">Login</button>
             </div>
-          </form>
+          </div>
         </div>
     </div>
     </div>

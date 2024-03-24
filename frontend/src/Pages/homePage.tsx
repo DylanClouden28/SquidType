@@ -1,8 +1,17 @@
 import sendIcon from '../assets/send-svgrepo-com.svg'
-
+import Picker from 'emoji-picker-react';
+import { Emoji } from 'emoji-picker-react';
+import { useState } from 'react';
 
 function home(){
 
+    const [emoji, setEmoji] = useState(null)
+    const customReactions = ['1F602'];
+    console.log(customReactions);
+
+    const handleEmojiSelect = (emojiObj, event) => {
+        setEmoji(emojiObj)
+    }
 
     return(
         <div className="p-4 bg-base-200 min-h-screen" data-theme="night">
@@ -182,6 +191,10 @@ function home(){
                         </div>
                     </div>
                     </div>
+                </div>
+
+                <div>
+                    <Picker reactionsDefaultOpen={true} reactions={customReactions} onEmojiClick={handleEmojiSelect} />
                 </div>
             </div>
     )
