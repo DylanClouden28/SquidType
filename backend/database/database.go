@@ -10,7 +10,7 @@ var client *mongo.Client
 
 func Collection(collection string) *mongo.Collection {
 	if client == nil {
-		clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+		clientOptions := options.Client().ApplyURI("mongodb://mongo:27017")
 		var err error
 		client, err = mongo.Connect(context.TODO(), clientOptions)
 		if err != nil {

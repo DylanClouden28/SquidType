@@ -4,14 +4,16 @@ import (
 	"context"
 	"encoding/binary"
 	"encoding/hex"
+	"fmt"
 	"sluggers/database"
 	"sluggers/models"
 
 	"crypto/sha256"
+	"math/rand"
+
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"golang.org/x/crypto/bcrypt"
-	"math/rand"
 )
 
 func Route(router *gin.Engine) {
@@ -33,7 +35,7 @@ func login(c *gin.Context) {
 	}
 	filter := bson.D{{"username", userLogin.Username}}
 	var loginAs models.User
-	user_err := userCollection.FindOne(context.TODO(), filter).Decode(*&loginAs)
+	user_err := userCollection.FindOne(context.TODO(), filter).Decode(&loginAs)
 	if user_err != nil {
 		c.JSON(400, "No such user")
 		return
@@ -56,7 +58,7 @@ func login(c *gin.Context) {
 	// turn the hash into hex
 	hashString := hex.EncodeToString(hashBytes)
 	loginAs.Token = hashString
-	c.SetCookie("auth", hashString, 2100000000, "/", "localhost:8080", true, true)
+	c.SetCookie("auth", hashString, 2100000000, "", "", true, true)
 
 }
 
@@ -67,6 +69,7 @@ func register(c *gin.Context) {
 	err := c.BindJSON(&newUser)
 	if err != nil {
 		c.JSON(400, "Bad JSON")
+		fmt.Println(err)
 		return
 	}
 
@@ -81,6 +84,7 @@ func register(c *gin.Context) {
 	_, ins_err := userCollection.InsertOne(context.TODO(), newUser)
 	if ins_err != nil {
 		c.JSON(400, "Error creating user, try a different username")
+		fmt.Println(ins_err)
 		return
 	}
 }
