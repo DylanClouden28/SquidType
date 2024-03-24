@@ -43,8 +43,9 @@ function App() {
 
       })
       if (!response.ok){
-        const {err} = await response.json()
-        setAlertLogin(err || 'Error with logging in')
+        const body = await response.json()
+        setAlertLogin(body || 'Error with logging in')
+        return 
       }
       nav('/home')
       
@@ -65,8 +66,9 @@ function App() {
         mode: "cors"
       })
       if (!response.ok){
-        const {err} = await response.json()
-        setAlertSignup(err || 'Error with creating account')
+        const body = await response.json()
+        setAlertSignup(body || 'Error with creating account')
+        return 
       }
 
 
@@ -156,7 +158,7 @@ function App() {
               <input onChange={e => setSignUpForm({username: signUpForm.username, password1: signUpForm.password1, password2: e.target.value})} value={signUpForm.password2} type="password" placeholder="password" className="input input-bordered" required />
             </div>
             <div className="form-control mt-6">
-              <button onClick={tryRegister} className="btn btn-primary">Login</button>
+              <button onClick={tryRegister} className="btn btn-primary">Create</button>
             </div>
           </div>
         </div>
