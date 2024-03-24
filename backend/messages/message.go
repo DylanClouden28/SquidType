@@ -64,6 +64,7 @@ func sendMessage(c *gin.Context) {
 	message.User = user
 	messages := database.Collection("messages")
 	message.ID = uuid.New().String()
+	message.Reaction = make([]models.Reaction, 0)
 	messages.InsertOne(context.TODO(), message)
 	c.JSON(200, "message received")
 
