@@ -69,7 +69,6 @@ func login(c *gin.Context) {
 		return
 	}
 	success := bcrypt.CompareHashAndPassword([]byte(loginAs.Password), []byte(userLogin.Password))
-	bcrypt.Comp
 	if success != nil {
 		fmt.Println("success err", success)
 		fmt.Println("logging into:", loginAs)
@@ -123,6 +122,7 @@ func register(c *gin.Context) {
 		return
 	}
 	newUser.Username = value.(string)
+	newUser.Password = jsonData["password1"].(string)
 	filter := bson.D{{"username", newUser.Username}}
 	var existing_user models.User
 	exist := userCollection.FindOne(context.TODO(), filter).Decode(&existing_user)
