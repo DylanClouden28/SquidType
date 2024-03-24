@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/binary"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"sluggers/database"
 	"sluggers/models"
@@ -96,6 +97,11 @@ func login(c *gin.Context) {
 
 }
 
+type passwords struct {
+	Password1 string `json:"password1"`
+	Password2 string `json:"password2"`
+}
+
 func register(c *gin.Context) {
 	var newUser models.User
 	userCollection := database.Collection("users")
@@ -106,8 +112,13 @@ func register(c *gin.Context) {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println("usr", newUser, newUser.Username, "name")
-
+	// fmt.Println("usr", newUser, newUser.Username, "name")
+	filter := bson.D{{"username", newUser.Username}}
+	exists := userCollection.FindOne(context.TODO(), filter).Decode(nil)
+	if exists != nil {
+		c.JSON(400, "User already exists")
+		return
+	}
 	hash, hash_err := bcrypt.GenerateFromPassword([]byte(newUser.Password), bcrypt.DefaultCost)
 	if hash_err != nil {
 		c.JSON(400, "Error hashing password(?)")
@@ -115,10 +126,20 @@ func register(c *gin.Context) {
 	}
 
 	newUser.Password = string(hash)
+	var password passwords
+	p_err := c.BindJSON(&password)
+	if p_err != nil {
+		c.JSON(400, "Error getting passwords")
+		return
+	}
+	if password.Password1 != password.Password2 {
+		c.JSON(400, "Passwords do not match")
+		return
+	}
 
 	_, ins_err := userCollection.InsertOne(context.TODO(), newUser)
 	if ins_err != nil {
-		c.JSON(400, "Error creating user, try a different username")
+		c.JSON(400, "Error creating user")
 		fmt.Println(ins_err)
 		return
 	}
