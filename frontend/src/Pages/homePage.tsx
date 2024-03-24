@@ -23,6 +23,7 @@ function home(){
 
     const [emoji, setEmoji] = useState(null)
     const [messages, setMessages] = useState([])
+    const [messageInput, setMessageInput] = useState("")
     const [isEmojiDropDown, setEmojiDropDown] = useState(false);
     const username = "bob"
 
@@ -46,23 +47,21 @@ function home(){
         }
     }
 
-    const sendMessage = async () => {
+    const sendMessage = async (message: string) => {
         try{
             const response = await fetch("http://localhost:8000/message/send-message", {
               method: "POST",
               mode: 'cors',
-              body: {
-                
-              }
+              body: JSON.stringify({
+                content: message
+              })
             })
             if (!response.ok){
               const {err} = await response.json()
               console.log(err)
             }
   
-            const {resMessages} = await response.json()
-  
-            setMessages(resMessages);
+            await getMessages();
             
         } catch (error){
             console.log(error)
@@ -81,7 +80,7 @@ function home(){
 
     return(
         <div className="p-4 bg-base-300 min-h-screen" data-theme="night">
-            <div className="navbar bg-base-100 rounded-box shadow-xl mb-40 p-4">
+            <div className="navbar bg-base-100 rounded-box shadow-xl mb-10 lg:mb-40 p-4">
             <div className="flex-1">
                 <a className="btn btn-ghost text-xl">Home Page</a>
             </div>
@@ -98,8 +97,8 @@ function home(){
             </div>
 
             <div className="grid justify-items-center">
-                <div className="card w-3/5 shadow-2xl max-w-3xl bg-base-200">
-                    <div className="chatBox p-2 h-[40rem] overflow-auto overflow-x-hidden">
+                <div className="card w-5/6 xl:w-6/12 2xl:w-4/12 shadow-2xl bg-base-200">
+                    <div className="chatBox p-2 h-[30rem] lg:h-[40rem] overflow-auto overflow-x-hidden">
                             { messages.length > 0 && messages.map(message =>
                             <div className={username === message?.user ? "chat chat-end" : "chat chat-start"}>
                                 <div className={username === message?.user ? "chat-header mr-2" : "chat-header ml-2"}>
@@ -125,8 +124,8 @@ function home(){
 
                     <div className="card-body p-2">
                         <div className="flex">
-                            <input className="input input-bordered flex-grow mx-2" placeholder="Type here" type="text" />
-                            <img className="btn btn-accent p-2" src={sendIcon}></img>
+                            <input className="input max-sm:input-sm input-bordered flex-grow mx-2" placeholder="Type here" value={messageInput} type="text" onChange={e => {setMessageInput(e.target.value)}}/>
+                            <img onClick={() => {sendMessage(messageInput)}} className="btn max-sm:btn-sm btn-accent p-2" src={sendIcon}></img>
                         </div>
                     </div>
                     <div className="dropdown dropdown-top dropdown-end">
