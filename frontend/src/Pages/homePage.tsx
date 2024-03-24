@@ -1,16 +1,17 @@
 import sendIcon from '../assets/send-svgrepo-com.svg'
-import Picker from 'emoji-picker-react';
-import { Emoji } from 'emoji-picker-react';
+import EmojiPicker from 'emoji-picker-react';
+// import { Emoji } from 'emoji-picker-react';
 import { useState } from 'react';
 
 function home(){
 
     const [emoji, setEmoji] = useState(null)
-    const customReactions = ['1F602'];
-    console.log(customReactions);
+    const [isEmojiDropDown, setEmojiDropDown] = useState(false);
 
-    const handleEmojiSelect = (emojiObj, event) => {
+    const handleEmojiSelect = (emojiObj: any, event: any) => {
         setEmoji(emojiObj)
+        console.log("closing")
+        setEmojiDropDown(false)
     }
 
     return(
@@ -190,12 +191,17 @@ function home(){
                             <img className="btn btn-accent p-2" src={sendIcon}></img>
                         </div>
                     </div>
-                    </div>
                 </div>
 
-                <div>
-                    <Picker reactionsDefaultOpen={true} reactions={customReactions} onEmojiClick={handleEmojiSelect} />
+                <div className="dropdown dropdown-top">
+                    <div tabIndex={0} role="button" className="btn m-1" onClick={() => {setEmojiDropDown(!isEmojiDropDown)}}>Click</div>
+                    {isEmojiDropDown && 
+                    <ul tabIndex={0} className="dropdown-content shadow-xl z-[1]">
+                        <li><EmojiPicker onEmojiClick={handleEmojiSelect} /></li>
+                    </ul>
+                    }
                 </div>
+            </div>
             </div>
     )
 }

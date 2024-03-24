@@ -33,12 +33,14 @@ function App() {
 
   const tryLogin = async () => {
     try{
-      const response = await fetch("http://localhost:8000/login", {
+      const response = await fetch("http://localhost:8000/auth/login", {
         method: "POST",
         body: JSON.stringify({
           username: loginForm.username,
           password: loginForm.password 
-        })
+        }),
+        mode: 'cors'
+
       })
       if (!response.ok){
         const {err} = await response.json()
@@ -53,7 +55,7 @@ function App() {
 
   const tryRegister = async () => {
     try{
-      const response = await fetch("http://localhost:8000/register", {
+      const response = await fetch("http://localhost:8000/auth/register", {
         method: "POST",
         body: JSON.stringify({
           username: signUpForm.username,
