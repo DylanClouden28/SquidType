@@ -2,11 +2,13 @@ package messages
 
 import (
 	"context"
-	"github.com/google/uuid"
+	"fmt"
 	"sluggers/controller"
 	"sluggers/database"
 	"sluggers/models"
 	"time"
+
+	"github.com/google/uuid"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
@@ -26,15 +28,17 @@ func Route(router *gin.Engine) {
 func getMessages(c *gin.Context) {
 	messages := make([]models.Message, 0)
 	collection := database.Collection("messages")
-	curr, err := collection.Find(context.TODO(), bson.D{{}})
+	curr, err := collection.Find(context.TODO(), bson.D{})
 	if err != nil {
+		fmt.Println("error", err)
 		c.JSON(500, "Error loading messages")
 		return
 	}
 	for curr.Next(context.TODO()) {
 		var message models.Message
-		err := curr.Decode(*&message)
+		err := curr.Decode(&message)
 		if err != nil {
+			fmt.Println(err)
 			c.JSON(500, "Error loading messages")
 			return
 		}
@@ -59,8 +63,8 @@ func sendMessage(c *gin.Context) {
 	message.Date = primitive.NewDateTimeFromTime(time.Now().UTC())
 	message.User = user
 	messages := database.Collection("messages")
-	messages.InsertOne(context.TODO(), message)
 	message.ID = uuid.New().String()
+	messages.InsertOne(context.TODO(), message)
 	c.JSON(200, "message received")
 
 }

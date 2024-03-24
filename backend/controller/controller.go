@@ -21,19 +21,31 @@ func Route(router *gin.Engine) {
 	{
 		auth.POST("/login", login)
 		auth.POST("/register", register)
+		auth.POST("/get-user", getUser)
 	}
+}
+
+func getUser(c *gin.Context) {
+	logged_in, usr := Auth(c)
+	if !logged_in {
+		c.JSON(400, "user not logged in")
+		return
+	}
+	c.JSON(200, usr)
 }
 
 func Auth(c *gin.Context) (bool, string) {
 	users := database.Collection("users")
 	auth, err := c.Cookie("auth")
 	if err != nil {
+		fmt.Println(err)
 		return false, ""
 	}
-	filter := bson.D{{"Token", auth}}
+	filter := bson.D{{"token", auth}}
 	var user models.User
 	user_err := users.FindOne(context.TODO(), filter).Decode(&user)
 	if user_err != nil {
+		fmt.Println(user_err, auth)
 		return false, ""
 	}
 	return true, user.Username
@@ -48,10 +60,11 @@ func login(c *gin.Context) {
 		c.JSON(400, "Bad JSON")
 		return
 	}
-	filter := bson.D{{"Username", userLogin.Username}}
+	filter := bson.D{{"username", userLogin.Username}}
 	var loginAs models.User
 	user_err := userCollection.FindOne(context.TODO(), filter).Decode(&loginAs)
 	if user_err != nil {
+		fmt.Println(user_err, loginAs.Username)
 		c.JSON(400, "No such user")
 		return
 	}
@@ -72,7 +85,13 @@ func login(c *gin.Context) {
 	hashBytes := hash.Sum(nil)
 	// turn the hash into hex
 	hashString := hex.EncodeToString(hashBytes)
-	loginAs.Token = hashString
+	update := bson.D{{"$set", bson.D{{"token", hashString}}}}
+	_, update_err := userCollection.UpdateOne(context.TODO(), filter, update)
+	if update_err != nil {
+		fmt.Println(update_err)
+		c.JSON(500, "error updating token")
+		return
+	}
 	c.SetCookie("auth", hashString, 2100000000, "", "", true, true)
 
 }
@@ -87,6 +106,7 @@ func register(c *gin.Context) {
 		fmt.Println(err)
 		return
 	}
+	fmt.Println("usr", newUser, newUser.Username, "name")
 
 	hash, hash_err := bcrypt.GenerateFromPassword([]byte(newUser.Password), bcrypt.DefaultCost)
 	if hash_err != nil {
@@ -102,5 +122,5 @@ func register(c *gin.Context) {
 		fmt.Println(ins_err)
 		return
 	}
-	c.JSON(200, "success")
+	// c.JSON(200, "success")
 }
