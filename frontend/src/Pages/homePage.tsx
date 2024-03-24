@@ -31,6 +31,8 @@ function home(){
     useEffect(() =>{
         getUser();
         getMessages();
+        console.log("Polling")
+        setInterval(() => {getMessages();}, 1000);
     }, [])
 
     const getUser = async () => {
@@ -96,9 +98,9 @@ function home(){
         }
     }
 
-    const sendEmoji = async () => {
+    const sendEmoji = async (emoji: string) => {
         try{
-            if(emoji?.emoji === undefined){
+            if(emoji === undefined){
                 return 
             }
             if(currentMessage === null){
@@ -108,7 +110,7 @@ function home(){
               method: "POST",
               mode: 'cors',
               body: JSON.stringify({
-                emoji: emoji?.emoji,
+                emoji: emoji,
                 username: username,
                 message_id: currentMessage
               }),
@@ -127,15 +129,12 @@ function home(){
     }
 
 
-    console.log(messages)
-    
-
     const handleEmojiSelect = (emojiObj: any, event: any) => {
         setEmoji(emojiObj)
         console.log(emojiObj.emoji)
         console.log("closing")
         setEmojiDropDown(false)
-        sendEmoji();
+        sendEmoji(emojiObj.emoji);
     }
 
     return(
