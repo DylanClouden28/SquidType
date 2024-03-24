@@ -1,6 +1,6 @@
 import sendIcon from '../assets/send-svgrepo-com.svg'
 import EmojiPicker from 'emoji-picker-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 function home(){
 
@@ -23,9 +23,36 @@ function home(){
 
     const [emoji, setEmoji] = useState(null)
     const [messages, setMessages] = useState([])
+    const [username, setUsername] = useState("")
+    const [currentMessage, setCurrentMessage] = useState(null)
     const [messageInput, setMessageInput] = useState("")
     const [isEmojiDropDown, setEmojiDropDown] = useState(false);
-    const username = "bob"
+
+    useEffect(() =>{
+        getUser();
+        getMessages();
+    }, [])
+
+    const getUser = async () => {
+        try{
+            const response = await fetch("http://localhost:8000/auth/get-user", {
+              method: "POST",
+              mode: 'cors',
+              credentials: "include"
+            })
+            if (!response.ok){
+              const {err} = await response.json()
+              console.log(err)
+            }
+  
+            const body = await response.json()
+  
+            setUsername(body);
+            
+          } catch (error){
+              console.log(error)
+          }
+    }
 
     const getMessages = async () => {
         try{
@@ -38,9 +65,9 @@ function home(){
             console.log(err)
           }
 
-          const {resMessages} = await response.json()
+          const body = await response.json()
 
-          setMessages(resMessages);
+          setMessages(body);
           
         } catch (error){
             console.log(error)
@@ -54,7 +81,38 @@ function home(){
               mode: 'cors',
               body: JSON.stringify({
                 content: message
-              })
+              }),
+              credentials: "include"
+            })
+            if (!response.ok){
+              const {err} = await response.json()
+              console.log(err)
+            }
+  
+            await getMessages();
+            
+        } catch (error){
+            console.log(error)
+        }
+    }
+
+    const sendEmoji = async () => {
+        try{
+            if(emoji?.emoji === undefined){
+                return 
+            }
+            if(currentMessage === null){
+                return
+            }
+            const response = await fetch("http://localhost:8000/message/send-emoji", {
+              method: "POST",
+              mode: 'cors',
+              body: JSON.stringify({
+                emoji: emoji?.emoji,
+                username: username,
+                message_id: currentMessage
+              }),
+              credentials: "include"
             })
             if (!response.ok){
               const {err} = await response.json()
@@ -70,12 +128,14 @@ function home(){
 
 
     console.log(messages)
+    
 
     const handleEmojiSelect = (emojiObj: any, event: any) => {
         setEmoji(emojiObj)
         console.log(emojiObj.emoji)
         console.log("closing")
         setEmojiDropDown(false)
+        sendEmoji();
     }
 
     return(
@@ -103,14 +163,16 @@ function home(){
                             <div className={username === message?.user ? "chat chat-end" : "chat chat-start"}>
                                 <div className={username === message?.user ? "chat-header mr-2" : "chat-header ml-2"}>
                                 {message?.user}
-                                <time className="text-xs opacity-50 px-1">{message?.Date?.toLocaleString("en-US", {hour: "2-digit", minute: "2-digit"})}</time>
+                                <time className="text-xs opacity-50 px-1">{new Date(message?.date)?.toLocaleString("en-US", {hour: "2-digit", minute: "2-digit"})}</time>
                                 </div>
-                                <div className="chat-bubble m-1 hover:bg-base-100" role="button" onClick={() => {setEmojiDropDown(!isEmojiDropDown)}}>
+                                <div className="chat-bubble m-1 hover:bg-base-100" role="button" onClick={() => {
+                                    setEmojiDropDown(!isEmojiDropDown);
+                                    setCurrentMessage(message?.uuid);
+                                    }}>
                                         <div className='tooltip' data-tip="Click to add Emoji">
                                         {message?.content}
                                         </div>
                                     </div>
-                                {/* <div className="chat-bubble">I hate you!</div> */}
                                 <div className="chat-footer">
                                     {message?.reaction && message?.reaction !== null && message.reaction.map(reaction => 
                                     <div className="badge badge-neutral mx-1 tooltip" data-tip={reaction?.username}>

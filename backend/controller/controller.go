@@ -95,8 +95,8 @@ func login(c *gin.Context) {
 		c.JSON(500, "error updating token")
 		return
 	}
-	c.SetCookie("auth", hashString, 2100000000, "", "", true, true)
-
+	c.SetCookie("auth", hashString, 2100000000, "", "", false, true)
+	c.JSON(200, "success")
 }
 
 func register(c *gin.Context) {

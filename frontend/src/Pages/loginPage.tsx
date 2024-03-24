@@ -39,6 +39,7 @@ function App() {
           username: loginForm.username,
           password: loginForm.password 
         }),
+        credentials: 'include',
         mode: 'cors'
 
       })
@@ -63,6 +64,7 @@ function App() {
           password1: signUpForm.password1,
           password2: signUpForm.password2,
         }),
+        credentials: 'include',
         mode: "cors"
       })
       if (!response.ok){

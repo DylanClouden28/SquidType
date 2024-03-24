@@ -81,9 +81,10 @@ func sendEmoji(c *gin.Context) {
 		c.JSON(500, "Cant read emoji")
 		return
 	}
+	fmt.Println("Emoji input", emoji)
 	emoji.Username = user
 	message_id := emoji.MessageId
-	filter := bson.D{{"message", message_id}}
+	filter := bson.D{{"uuid", message_id}}
 	var message models.Message
 	messages := database.Collection("messages")
 	mess_err := messages.FindOne(context.TODO(), filter).Decode(&message)
