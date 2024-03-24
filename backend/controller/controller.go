@@ -24,6 +24,21 @@ func Route(router *gin.Engine) {
 	}
 }
 
+func Auth(c *gin.Context) (bool, string) {
+	users := database.Collection("users")
+	auth, err := c.Cookie("auth")
+	if err != nil {
+		return false, ""
+	}
+	filter := bson.D{{"Token", auth}}
+	var user models.User
+	user_err := users.FindOne(context.TODO(), filter).Decode(&user)
+	if user_err != nil {
+		return false, ""
+	}
+	return true, user.Username
+}
+
 func login(c *gin.Context) {
 	var userLogin models.User
 	userCollection := database.Collection("users")
@@ -33,7 +48,7 @@ func login(c *gin.Context) {
 		c.JSON(400, "Bad JSON")
 		return
 	}
-	filter := bson.D{{"username", userLogin.Username}}
+	filter := bson.D{{"Username", userLogin.Username}}
 	var loginAs models.User
 	user_err := userCollection.FindOne(context.TODO(), filter).Decode(&loginAs)
 	if user_err != nil {
@@ -87,4 +102,5 @@ func register(c *gin.Context) {
 		fmt.Println(ins_err)
 		return
 	}
+	c.JSON(200, "success")
 }
