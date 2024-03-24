@@ -77,6 +77,7 @@ func sendEmoji(c *gin.Context) {
 	}
 	var emoji models.Reaction
 	err := c.BindJSON(&emoji)
+	fmt.Println(emoji)
 	if err != nil {
 		c.JSON(500, "Cant read emoji")
 		return
@@ -85,14 +86,22 @@ func sendEmoji(c *gin.Context) {
 	emoji.Username = user
 	message_id := emoji.MessageId
 	filter := bson.D{{"uuid", message_id}}
-	var message models.Message
+	/*var message models.Message
+		messages := database.Collection("messages")
+		mess_err := messages.FindOne(context.TODO(), filter).Decode(&message)
+		if mess_err != nil {
+			c.JSON(400, "No such message")
+			return
+		}
+	  message.Reaction = append(message.Reaction, emoji)*/
 	messages := database.Collection("messages")
-	mess_err := messages.FindOne(context.TODO(), filter).Decode(&message)
-	if mess_err != nil {
-		c.JSON(400, "No such message")
+
+	update := bson.D{{"$push", bson.D{{"reaction", emoji}}}}
+	result, update_err := messages.UpdateOne(context.TODO(), filter, update)
+	fmt.Println(result)
+	if update_err != nil {
+		c.JSON(400, "Error adding emoji")
 		return
 	}
-	emojis := database.Collection("emojis")
-	emojis.InsertOne(context.TODO(), emoji)
 	c.JSON(200, "success")
 }
