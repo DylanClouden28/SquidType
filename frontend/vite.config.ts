@@ -6,5 +6,10 @@ export default defineConfig({
   plugins: [react()],
   define: {
     global: {},
+  },
+  server: {
+    headers: {
+      "X-Content-Type-Options": "nosniff",
+    }
   }
 })
