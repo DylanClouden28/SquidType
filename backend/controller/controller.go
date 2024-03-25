@@ -40,7 +40,7 @@ func signOut(c *gin.Context) {
 		c.JSON(500, "Error logging out")
 		return
 	}
-	c.SetCookie("auth", "", 0, "", "", false, true)
+	c.SetCookie("auth", "", -3000, "", "", false, true)
 	c.JSON(200, "ok")
 }
 
