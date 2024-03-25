@@ -11,5 +11,10 @@ export default defineConfig({
     headers: {
       "X-Content-Type-Options": "nosniff",
     }
+  },
+  preview: {
+    headers: {
+      "X-Content-Type-Options": "nosniff",
+    }
   }
 })
