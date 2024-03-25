@@ -34,7 +34,7 @@ func signOut(c *gin.Context) {
 	}
 	users := database.Collection("users")
 	filter := bson.D{{"username", usr}}
-	update := bson.D{{"$set", bson.D{{"auth", ""}}}}
+	update := bson.D{{"$set", bson.D{{"token", ""}}}}
 	_, err := users.UpdateOne(context.TODO(), filter, update)
 	if err != nil {
 		c.JSON(500, "Error logging out")
