@@ -2,7 +2,6 @@ package controller
 
 import (
 	"context"
-	"encoding/binary"
 	"encoding/hex"
 	"fmt"
 	"sluggers/database"
@@ -60,7 +59,8 @@ func Auth(c *gin.Context) (bool, string) {
 		fmt.Println(err)
 		return false, ""
 	}
-	filter := bson.D{{"token", auth}}
+	hashedToken := hasher(auth)
+	filter := bson.D{{"token", hashedToken}}
 	var user models.User
 	user_err := users.FindOne(context.TODO(), filter).Decode(&user)
 	if user_err != nil {
@@ -68,6 +68,17 @@ func Auth(c *gin.Context) (bool, string) {
 		return false, ""
 	}
 	return true, user.Username
+}
+
+func hasher(hashStr string) string {
+
+	hash := sha256.New()
+	hashBytes, _ := hex.DecodeString(hashStr)
+	// write those bytes to the hash and output it
+	hash.Write(hashBytes)
+	// turn the hash into hex
+	hashString := hex.EncodeToString(hash.Sum(nil))
+	return hashString
 }
 
 func login(c *gin.Context) {
@@ -93,25 +104,19 @@ func login(c *gin.Context) {
 		return
 	}
 	// get hash object
-	hash := sha256.New()
 	// get random int
-	unhashed := rand.Int()
+	unhashed := rand.Uint64()
+	token := hasher(string(unhashed))
+	hashedToken := hasher(token)
 	// make 8 byte slice and put the int into it
-	bytes := make([]byte, 8)
-	binary.LittleEndian.PutUint64(bytes, uint64(unhashed))
-	// write those bytes to the hash and output it
-	hash.Write(bytes)
-	hashBytes := hash.Sum(nil)
-	// turn the hash into hex
-	hashString := hex.EncodeToString(hashBytes)
-	update := bson.D{{"$set", bson.D{{"token", hashString}}}}
+	update := bson.D{{"$set", bson.D{{"token", hashedToken}}}}
 	_, update_err := userCollection.UpdateOne(context.TODO(), filter, update)
 	if update_err != nil {
 		fmt.Println(update_err)
 		c.JSON(500, "error updating token")
 		return
 	}
-	c.SetCookie("auth", hashString, 2100000000, "", "", false, true)
+	c.SetCookie("auth", token, 2100000000, "", "", false, true)
 	c.JSON(200, "success")
 }
 
