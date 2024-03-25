@@ -11,8 +11,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func NoSniff() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("X-Content-Type-Options", "nosniff")
+		c.Next()
+	}
+
+}
+
 func main() {
 	r := gin.Default()
+	r.Use(NoSniff())
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:8080", "http://localhost:5173"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"},
