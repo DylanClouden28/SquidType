@@ -1,6 +1,8 @@
 import sendIcon from '../assets/send-svgrepo-com.svg'
+import LiterallyHim from '../assets/LiterallyHim.jpg'
 import EmojiPicker from 'emoji-picker-react';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function home(){
 
@@ -23,10 +25,12 @@ function home(){
 
     const [emoji, setEmoji] = useState(null)
     const [messages, setMessages] = useState([])
+    const [isHelp, setIsHelp] = useState(true);
     const [username, setUsername] = useState("")
     const [currentMessage, setCurrentMessage] = useState(null)
     const [messageInput, setMessageInput] = useState("")
     const [isEmojiDropDown, setEmojiDropDown] = useState(false);
+    const nav = useNavigate();
 
     useEffect(() =>{
         getUser();
@@ -45,11 +49,31 @@ function home(){
             if (!response.ok){
               const {err} = await response.json()
               console.log(err)
+              nav('/login')
             }
   
             const body = await response.json()
   
             setUsername(body);
+            
+          } catch (error){
+              console.log(error)
+          }
+    }
+
+    const signOut = async () => {
+        try{
+            const response = await fetch("http://localhost:8000/auth/signout", {
+              method: "POST",
+              mode: 'cors',
+              credentials: "include"
+            })
+            if (!response.ok){
+              const {err} = await response.json()
+              console.log(err)
+            }
+  
+            nav('/login')
             
           } catch (error){
               console.log(error)
@@ -70,6 +94,9 @@ function home(){
           const body = await response.json()
 
           setMessages(body);
+
+          // lastMessage = body[body.length - 1] gives you last message
+          // scrollToId(lastmessage.uuid)
           
         } catch (error){
             console.log(error)
@@ -139,23 +166,29 @@ function home(){
 
     return(
         <div className="p-4 bg-base-300 min-h-screen" data-theme="night">
-            <div className="navbar bg-base-100 rounded-box shadow-xl mb-10 lg:mb-40 p-4">
-            <div className="flex-1">
-                <a className="btn btn-ghost text-xl">Home Page</a>
+            <div className="navbar bg-base-100 rounded-box shadow-xl mb-10 lg:mb-20 p-4">
+            <div className="navbar-start btn btn-sm scale-[0.1]">
+                <img className="" src={LiterallyHim} />
             </div>
             <div className="navbar-end">
-                <div className="dropdown dropdown-bottom dropdown-end">
-                <div tabIndex={0} role="button" className="btn btn-ghost btn-circle">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h7" /></svg>
-                </div>
-                <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
-                    <li><a>Signout</a></li>
-                </ul>
-                </div>
+                <h1 className='text-2xl px-4'>{username}</h1>
+                <button className='btn btn-neutral' onClick={signOut}>Signout</button>
             </div>
             </div>
-
             <div className="grid justify-items-center">
+
+                {isHelp && 
+                <div role="alert" className="alert alert-info max-w-2xl mb-5">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span>Create messages below, react to messages by clicking on message and choosing reaction!</span>
+                    <div>
+                        <button onClick={() => {setIsHelp(false)}} className="btn btn-ghost btn-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                    </div>
+                </div>
+                }
+
                 <div className="card w-5/6 xl:w-6/12 2xl:w-4/12 shadow-2xl bg-base-200">
                     <div className="chatBox p-2 h-[30rem] lg:h-[40rem] overflow-auto overflow-x-hidden">
                             { messages.length > 0 && messages.map(message =>
