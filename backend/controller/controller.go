@@ -22,7 +22,26 @@ func Route(router *gin.Engine) {
 		auth.POST("/login", login)
 		auth.POST("/register", register)
 		auth.POST("/get-user", getUser)
+		auth.POST("/signout", signOut)
 	}
+}
+
+func signOut(c *gin.Context) {
+	logged_in, usr := Auth(c)
+	if !logged_in {
+		c.JSON(400, "Not logged in")
+		return
+	}
+	users := database.Collection("users")
+	filter := bson.D{{"username", usr}}
+	update := bson.D{{"$set", bson.D{{"auth", ""}}}}
+	_, err := users.UpdateOne(context.TODO(), filter, update)
+	if err != nil {
+		c.JSON(500, "Error logging out")
+		return
+	}
+	c.SetCookie("auth", "", 0, "", "", false, true)
+	c.JSON(200, "ok")
 }
 
 func getUser(c *gin.Context) {
