@@ -1,5 +1,6 @@
 import { useState} from 'react'
 import { useNavigate } from 'react-router-dom';
+import LiterallyHim from '../assets/LiterallyHim.jpg'
 
 
 function App() {
@@ -94,7 +95,10 @@ function App() {
     <div className="hero min-h-screen bg-base-200 justify-center" id='login'>
       <div className="hero-content flex-col lg:flex-row-reverse">
         <div className="text-center lg:text-left">
-          <h1 className="text-5xl font-bold text-primary">Login now!</h1>
+          <div className="w-64 h-64 p-4 pb-10 shadow-xl">
+            <img className="" src={LiterallyHim} />
+          </div>
+          <h1 className="text-5xl font-bold text-primary pt-4 ">Login now!</h1>
           <p className='text-3xl font-bold'>Don't have account   <button onClick={signUpScroll} className='btn btn-lg btn-outline btn-accent text-5xl font-bold italic '>Sign Up!</button></p>
         </div>
         <div className="card shrink-0 w-full max-w-sm shadow-2xl bg-base-100">

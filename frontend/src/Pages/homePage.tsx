@@ -181,8 +181,8 @@ function home(){
     return(
         <div className="p-4 bg-base-300 min-h-screen" data-theme="night">
             <div className="navbar bg-base-100 rounded-box shadow-xl mb-10 lg:mb-20 p-4">
-            <div className="navbar-start btn btn-sm scale-[0.1]">
-                <img className="" src={LiterallyHim} />
+            <div className="navbar-start">
+                <img className="p-0 w-10 h-10" src={LiterallyHim} />
             </div>
             <div className="navbar-end">
                 <h1 className='text-2xl px-4'>{username}</h1>
@@ -204,7 +204,7 @@ function home(){
                 }
 
                 <div className="card w-5/6 xl:w-6/12 2xl:w-4/12 shadow-2xl bg-base-200">
-                    <div className="chatBox p-2 h-[30rem] lg:h-[40rem] overflow-auto overflow-x-hidden">
+                    <div className={isHelp ? "chatBox p-2 h-[20rem] 2xl:h-[35rem] overflow-auto overflow-x-hidden" : "chatBox p-2 h-[25rem] lg:h-[40rem] overflow-auto overflow-x-hidden"}>
                             { messages.length > 0 && messages.map(message =>
                             <div className={username === message?.user ? "chat chat-end" : "chat chat-start"}>
                                 <div className={username === message?.user ? "chat-header mr-2" : "chat-header ml-2"}>
