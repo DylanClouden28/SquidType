@@ -31,6 +31,15 @@ function App() {
     Element.scrollIntoView({behavior: "smooth"})
   }
 
+  const loginScroll = () => {
+    const Element = document.getElementById('login')
+    if (Element === undefined || Element === null){
+      return
+    }
+    // https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoView
+    Element.scrollIntoView({behavior: "smooth"})
+  }
+
   const tryLogin = async () => {
     try{
       const response = await fetch("http://localhost:8000/auth/login", {
@@ -73,6 +82,7 @@ function App() {
         return 
       }
 
+      loginScroll()
 
     } catch (error){
       setAlertSignup("Error with creating account")
@@ -81,7 +91,7 @@ function App() {
 
   return (
     <div data-theme="night">
-    <div className="hero min-h-screen bg-base-200 justify-center">
+    <div className="hero min-h-screen bg-base-200 justify-center" id='login'>
       <div className="hero-content flex-col lg:flex-row-reverse">
         <div className="text-center lg:text-left">
           <h1 className="text-5xl font-bold text-primary">Login now!</h1>

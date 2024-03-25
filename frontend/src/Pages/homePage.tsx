@@ -70,6 +70,9 @@ function home(){
           const body = await response.json()
 
           setMessages(body);
+
+          const lastMessage = body[body.length - 1]
+          messageScroll(lastMessage.uuid)
           
         } catch (error){
             console.log(error)
@@ -78,6 +81,9 @@ function home(){
 
     const sendMessage = async (message: string) => {
         try{
+            if (message == ''){
+                return
+            }
             const response = await fetch("http://localhost:8000/message/send-message", {
               method: "POST",
               mode: 'cors',
@@ -90,6 +96,8 @@ function home(){
               const {err} = await response.json()
               console.log(err)
             }
+
+            setMessageInput('')
   
             await getMessages();
             
@@ -137,6 +145,15 @@ function home(){
         sendEmoji(emojiObj.emoji);
     }
 
+    const messageScroll = async (lastMsg: string) => {
+        const Element = document.getElementById(lastMsg)
+        if (Element === undefined || Element === null){
+          return
+        }
+        // https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoView
+        Element.scrollIntoView({behavior: "smooth"})
+      }
+
     return(
         <div className="p-4 bg-base-300 min-h-screen" data-theme="night">
             <div className="navbar bg-base-100 rounded-box shadow-xl mb-10 lg:mb-40 p-4">
@@ -164,7 +181,7 @@ function home(){
                                 {message?.user}
                                 <time className="text-xs opacity-50 px-1">{new Date(message?.date)?.toLocaleString("en-US", {hour: "2-digit", minute: "2-digit"})}</time>
                                 </div>
-                                <div className="chat-bubble m-1 hover:bg-base-100" role="button" onClick={() => {
+                                <div className="chat-bubble m-1 hover:bg-base-100" id={message.uuid} role="button" onClick={() => {
                                     setEmojiDropDown(!isEmojiDropDown);
                                     setCurrentMessage(message?.uuid);
                                     }}>
