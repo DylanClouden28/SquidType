@@ -163,3 +163,20 @@ func register(c *gin.Context) {
 	}
 	c.JSON(200, "success")
 }
+
+func uploadImage(c *gin.Context) {
+    file, err := c.FormFile("image")
+    if err != nil {
+        c.JSON(400, "Error: Upload failed")
+        return
+    }
+
+    //location /auth/images ?
+    filePath := "/auth/images/" + file.Filename
+    if err := c.SaveFile(file, filePath); err != nil {
+        c.JSON(400, "Error: Failed to save")
+        return
+    }
+
+    c.JSON(200, "Upload successful")
+}

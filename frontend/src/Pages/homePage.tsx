@@ -1,8 +1,12 @@
 import sendIcon from '../assets/send-svgrepo-com.svg'
 import LiterallyHim from '../assets/LiterallyHim.jpg'
 import EmojiPicker from 'emoji-picker-react';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+import Modal from '../components/Modal'
+
+import '../App.css'
 
 function home(){
 
@@ -32,12 +36,22 @@ function home(){
     const [isEmojiDropDown, setEmojiDropDown] = useState(false);
     const nav = useNavigate();
 
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
     useEffect(() =>{
         getUser();
         getMessages();
         console.log("Polling")
         setInterval(() => {getMessages();}, 1000);
     }, [])
+
+    const openModal = () => {
+        setIsModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+    };
 
     const getUser = async () => {
         try{
@@ -187,6 +201,8 @@ function home(){
             <div className="navbar-end">
                 <h1 className='text-2xl px-4'>{username}</h1>
                 <button className='btn btn-neutral' onClick={signOut}>Signout</button>
+                <button className='btn btn-neutral' onClick={openModal}>Open Modal</button>
+                <Modal isModalOpen={isModalOpen} onClose={closeModal}/>
             </div>
             </div>
             <div className="grid justify-items-center">
