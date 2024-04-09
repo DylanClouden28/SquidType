@@ -201,8 +201,8 @@ function home(){
             <div className="navbar-end">
                 <h1 className='text-2xl px-4'>{username}</h1>
                 <button className='btn btn-neutral' onClick={signOut}>Signout</button>
-                <button className='btn btn-neutral' onClick={openModal}>Open Modal</button>
-                <Modal isModalOpen={isModalOpen} onClose={closeModal}/>
+                {/* <button className='btn btn-neutral' onClick={openModal}>Open Modal</button> */}
+                <Modal />
             </div>
             </div>
             <div className="grid justify-items-center">

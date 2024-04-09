@@ -22,6 +22,7 @@ func Route(router *gin.Engine) {
 		auth.POST("/register", register)
 		auth.POST("/get-user", getUser)
 		auth.POST("/signout", signOut)
+		auth.POST("/upload", uploadImage)
 	}
 }
 
@@ -165,18 +166,24 @@ func register(c *gin.Context) {
 }
 
 func uploadImage(c *gin.Context) {
-    file, err := c.FormFile("image")
-    if err != nil {
-        c.JSON(400, "Error: Upload failed")
-        return
-    }
+	logged_in, usr := Auth(c)
+	if !logged_in {
+		c.JSON(400, "Not logged in")
+		return
+	}
 
-    //location /auth/images ?
-    filePath := "/auth/images/" + file.Filename
-    if err := c.SaveFile(file, filePath); err != nil {
-        c.JSON(400, "Error: Failed to save")
-        return
-    }
+	file, err := c.FormFile("image")
+	if err != nil {
+		c.JSON(400, "Error: Upload failed")
+		return
+	}
 
-    c.JSON(200, "Upload successful")
+	//location /public/images ?
+	filePath := "/public/images/" + usr + ".png"
+	if err := c.SaveUploadedFile(file, filePath); err != nil {
+		c.JSON(400, "Error: Failed to save")
+		return
+	}
+
+	c.JSON(200, "Upload successful")
 }
