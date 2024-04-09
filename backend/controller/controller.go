@@ -7,8 +7,8 @@ import (
 	"sluggers/database"
 	"sluggers/models"
 
+	"crypto/rand"
 	"crypto/sha256"
-	"math/rand"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
@@ -71,11 +71,9 @@ func Auth(c *gin.Context) (bool, string) {
 }
 
 func hasher(hashStr string) string {
-
 	hash := sha256.New()
-	hashBytes, _ := hex.DecodeString(hashStr)
 	// write those bytes to the hash and output it
-	hash.Write(hashBytes)
+	hash.Write([]byte(hashStr))
 	// turn the hash into hex
 	hashString := hex.EncodeToString(hash.Sum(nil))
 	return hashString
@@ -103,12 +101,14 @@ func login(c *gin.Context) {
 		c.JSON(400, "Incorrect passowrd")
 		return
 	}
-	// get hash object
-	// get random int
-	unhashed := rand.Uint64()
-	token := hasher(string(unhashed))
+	unhashed_bytes := make([]byte, 20)
+	_, rnd_err := rand.Read(unhashed_bytes)
+	if rnd_err != nil {
+		fmt.Println(rnd_err, "error creating auth token")
+		c.JSON(500, "error creating auth token")
+	}
+	token := hasher(hex.EncodeToString(unhashed_bytes))
 	hashedToken := hasher(token)
-	// make 8 byte slice and put the int into it
 	update := bson.D{{"$set", bson.D{{"token", hashedToken}}}}
 	_, update_err := userCollection.UpdateOne(context.TODO(), filter, update)
 	if update_err != nil {
