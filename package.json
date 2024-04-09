@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "daisyui": "^4.10.1",
+    "react-cropper": "^2.3.3"
+  }
+}
