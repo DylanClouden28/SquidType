@@ -21,3 +21,6 @@
 go.work
 
 node_modules
+
+#pfp
+backend/public/images

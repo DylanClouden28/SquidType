@@ -178,8 +178,8 @@ func uploadImage(c *gin.Context) {
 		return
 	}
 
-	//location /public/images ?
-	filePath := "/public/images/" + usr + ".png"
+	//location ./public/images
+	filePath := "./public/images/" + usr + ".png"
 	if err := c.SaveUploadedFile(file, filePath); err != nil {
 		c.JSON(400, "Error: Failed to save")
 		return

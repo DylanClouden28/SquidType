@@ -40,10 +40,12 @@ export const CropTool: React.FC = () => {
         try {
             const response = await fetch('http://localhost:8000/auth/upload', {
                 method: 'POST',
+                mode: 'cors',
                 body: formData,
                 headers: {
                     //headers
                 },
+                credentials: "include"
             });
             if (response.ok) {
                 console.log('Uploaded successfully!');
