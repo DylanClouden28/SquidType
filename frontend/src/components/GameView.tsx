@@ -15,9 +15,11 @@ const GameView = () => {
 
     const comparisonText = () =>{
         let text = [];
+        let error = false;
         for (let i =0; i < testTypingText.length; i++){
             const truthChar = testTypingText[i];
             let acutalChar = undefined;
+
 
             if (typeInput.length > i){
                 acutalChar = typeInput[i];
@@ -29,11 +31,19 @@ const GameView = () => {
                 text.push(<span className="text-base-content">{truthChar}</span>);
             }
             else if(truthChar !== acutalChar){
-                console.log("Error")
-                text.push(<span className="text-error">{truthChar}</span>);
+                // console.log("Error")
+                if (truthChar === " "){
+                    text.push(<span className="text-error">_</span>);
+                }else{
+                    text.push(<span className="text-error">{truthChar}</span>);
+                }
+                error = true
             }
             else{
-                console.log("Success")
+                if (error === true){
+                    text.push(<span className="text-error">{truthChar}</span>);
+                    continue
+                }
                 text.push(<span className="text-success">{truthChar}</span>);
             }
         }
