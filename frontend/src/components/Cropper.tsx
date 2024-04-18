@@ -149,6 +149,8 @@ export const CropTool: React.FC<CropProps> = ({cropData, setCropData, finalImage
           <button className="btn btn-primary w-2/3" onClick={() => {
             getCropData();
             setFinalImage(cropData);
+            clearCropData();
+            setImage(null);
             document.getElementById('my_modal_2').close();
           }}>
           Use Image
