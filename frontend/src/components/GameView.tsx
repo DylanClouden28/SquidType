@@ -1,4 +1,5 @@
 import { useState } from "react"
+import goSound from '../assets/goSound.mp3'
 
 
 const GameView = () => {
@@ -6,7 +7,6 @@ const GameView = () => {
     const mockUsers = ['User1', "Dylan", "Chris", "Steve", "Steve", "Steve", "Steve"]
 
     const [typeInput, setInputValue] = useState('');
-
     const handleInputChange = (e) => {
         setInputValue(e.target.value);
     }
@@ -23,28 +23,27 @@ const GameView = () => {
 
             if (typeInput.length > i){
                 acutalChar = typeInput[i];
-                console.log(typeInput.length, truthChar, acutalChar)
             }
 
             if (acutalChar === undefined){
                 // console.log("Undefined")
-                text.push(<span className="text-base-content">{truthChar}</span>);
+                text.push(<span className="text-base-content" key={i}>{truthChar}</span>);
             }
             else if(truthChar !== acutalChar){
                 // console.log("Error")
                 if (truthChar === " "){
-                    text.push(<span className="text-error">_</span>);
+                    text.push(<span className="text-error" key={i}>_</span>);
                 }else{
-                    text.push(<span className="text-error">{truthChar}</span>);
+                    text.push(<span className="text-error" key={i}>{truthChar}</span>);
                 }
                 error = true
             }
             else{
                 if (error === true){
-                    text.push(<span className="text-error">{truthChar}</span>);
+                    text.push(<span className="text-error" key={i}>{truthChar}</span>);
                     continue
                 }
-                text.push(<span className="text-success">{truthChar}</span>);
+                text.push(<span className="text-success" key={i}>{truthChar}</span>);
             }
         }
         // console.log(text)
@@ -86,6 +85,17 @@ const GameView = () => {
             <input value={typeInput} onPaste={(e) => {e.preventDefault();}} onChange={handleInputChange} placeholder="Start typing here" className="input input-md input-bordered"></input>
         </div>
 
+        <button className="btn btn-primary" onClick={() => {
+            // console.log(document.getElementById("gostart"));
+            document.getElementById("gostart").play();
+            }}>Test Start</button>
+        <audio id="gostart"><source src={goSound}></source></audio>
+        {/* <div className="inset-0 z-10 fixed flex items-center justify-center p-4">
+            <p className="text-9xl font-bold bg-base-300"></p>
+            <span className="countdown">
+            <   span className="text-9xl" style={{"--value":3}}></span>
+            </span>
+        </div> */}
         </div>
     )
 }
