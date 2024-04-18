@@ -66,7 +66,7 @@ const GameView = () => {
                 {comparisonText()}
                 </p>
             </div>
-            <input value={typeInput} onChange={handleInputChange} placeholder="Start typing here" className="input input-md input-bordered"></input>
+            <input value={typeInput} onPaste={(e) => {e.preventDefault();}} onChange={handleInputChange} placeholder="Start typing here" className="input input-md input-bordered"></input>
         </div>
 
         </div>
