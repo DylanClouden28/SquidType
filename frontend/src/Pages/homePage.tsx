@@ -36,7 +36,7 @@ function home(){
     const [isEmojiDropDown, setEmojiDropDown] = useState(false);
     const nav = useNavigate();
 
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    // const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() =>{
         getUser();
@@ -45,13 +45,13 @@ function home(){
         setInterval(() => {getMessages();}, 1000);
     }, [])
 
-    const openModal = () => {
-        setIsModalOpen(true);
-    };
+    // const openModal = () => {
+    //     setIsModalOpen(true);
+    // };
 
-    const closeModal = () => {
-        setIsModalOpen(false);
-    };
+    // const closeModal = () => {
+    //     setIsModalOpen(false);
+    // };
 
     const getUser = async () => {
         try{
@@ -188,9 +188,25 @@ function home(){
         if (Element === undefined || Element === null){
           return
         }
-        // https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoView
         Element.scrollIntoView({behavior: "smooth"})
-      }
+    }
+
+    // const getPFP = async () => {
+    //     try{
+    //         const response = await fetch(`http://localhost:8000/public/images/${username}.png`, {
+    //           method: "POST",
+    //           mode: 'cors',
+    //           credentials: "include"
+    //         })
+    //         if (!response.ok){
+    //           const {err} = await response.json()
+    //           console.log(err)
+    //         }
+            
+    //       } catch (error){
+    //           console.log(error)
+    //       }
+    // }
 
     return(
         <div className="p-4 bg-base-300 min-h-screen" data-theme="night">
@@ -199,6 +215,10 @@ function home(){
                 <img className="p-0 w-10 h-10" src={LiterallyHim} />
             </div>
             <div className="navbar-end">
+                <img
+                    className="p-0 w-10 h-10"
+                    src={username ? `http://localhost:8000/public/images/${username}.png` : LiterallyHim}
+                />
                 <h1 className='text-2xl px-4'>{username}</h1>
                 <button className='btn btn-neutral' onClick={signOut}>Signout</button>
                 {/* <button className='btn btn-neutral' onClick={openModal}>Open Modal</button> */}
@@ -220,9 +240,14 @@ function home(){
                 }
 
                 <div className="card w-5/6 xl:w-6/12 2xl:w-4/12 shadow-2xl bg-base-200">
-                    <div className={isHelp ? "chatBox p-2 h-[20rem] 2xl:h-[35rem] overflow-auto overflow-x-hidden" : "chatBox p-2 h-[25rem] lg:h-[40rem] overflow-auto overflow-x-hidden"}>
+                    <div className={isHelp ? "chatBox p-2 h-[20rem] 2xl:h-[22rem] overflow-auto overflow-x-hidden" : "chatBox p-2 h-[25rem] lg:h-[28rem] overflow-auto overflow-x-hidden"}>
                             { messages.length > 0 && messages.map(message =>
                             <div className={username === message?.user ? "chat chat-end" : "chat chat-start"}>
+                                <div className="chat-image avatar">
+                                    <div className="w-10 rounded-full">
+                                    <img alt="Tailwind CSS chat bubble component" src={username === message?.user ? `http://localhost:8000/public/images/${username}.png`: `http://localhost:8000/public/images/${message?.user}.png`} />
+                                    </div>
+                                </div>
                                 <div className={username === message?.user ? "chat-header mr-2" : "chat-header ml-2"}>
                                 {message?.user}
                                 <time className="text-xs opacity-50 px-1">{new Date(message?.date)?.toLocaleString("en-US", {hour: "2-digit", minute: "2-digit"})}</time>

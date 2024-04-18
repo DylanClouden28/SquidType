@@ -36,5 +36,6 @@ func main() {
 	}))
 	controller.Route(r)
 	messages.Route(r)
+	r.Static("/public/images", "./public/images")
 	r.Run(":8000")
 }
