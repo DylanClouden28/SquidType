@@ -3,13 +3,19 @@ import Cropper, { ReactCropperElement } from "react-cropper";
 import "cropperjs/dist/cropper.css";
 import "../App.css";
 
-const defaultSrc =
-  "https://raw.githubusercontent.com/roadmanfong/react-cropper/master/example/img/child.jpg";
+interface CropProps{
+  cropData: any;
+  setCropData: any;
+  finalImage: any;
+  setFinalImage: any;
+}
 
-export const CropTool: React.FC = () => {
-  const [image, setImage] = useState(defaultSrc);
-  const [cropData, setCropData] = useState("#");
+export const CropTool: React.FC<CropProps> = ({cropData, setCropData, finalImage, setFinalImage}) => {
+  const [image, setImage] = useState();
+  const [isSelected, setSelected]= useState(false);
   const cropperRef = useRef<ReactCropperElement>(null);
+  
+
   const onChange = (e: any) => {
     e.preventDefault();
     let files;
@@ -24,6 +30,18 @@ export const CropTool: React.FC = () => {
     };
     reader.readAsDataURL(files[0]);
   };
+
+  const handleCropData = () => {
+    setSelected(true);
+    if (typeof cropperRef.current?.cropper !== "undefined") {
+      setCropData(cropperRef.current?.cropper.getCroppedCanvas().toDataURL());
+    }
+  }
+
+  const clearCropData = () => {
+    setSelected(false);
+    setCropData("");
+  }
 
   const getCropData = async () => {
     if (typeof cropperRef.current?.cropper !== "undefined") {
@@ -85,10 +103,7 @@ export const CropTool: React.FC = () => {
     <div>
       <div style={{ width: "100%" }}>
         <input type="file" onChange={onChange} />
-        <button>Use default img</button>
-        <br />
-        <br />
-        { image && cropperRef && <Cropper
+        { image && cropperRef && !isSelected && <Cropper
           ref={cropperRef}
           style={{ height: 400, width: "100%" }}
           zoomTo={0.5}
@@ -106,26 +121,42 @@ export const CropTool: React.FC = () => {
           guides={true}
         />}
       </div>
+
+      {image && !cropData &&
+            <div className=" mt-4 flex justify-center">
+              <button className="btn btn-primary w-full" onClick={() => {handleCropData()}}>
+                Crop Image
+              </button>
+            </div>
+          }
       <div>
-        <div className="box" style={{ width: "50%", float: "right" }}>
-          <h1>Preview</h1>
-          <div
-            className="img-preview"
-            style={{ width: "100%", float: "left", height: "300px" }}
-          />
+
+      {cropData && 
+      <>
+        <div className="box flex justify-center"> 
+          <div className="avatar">
+              <div className="rounded-full w-64 h-64">
+              <img style={{ width: "100%" }} src={cropData} alt="cropped" />
+              </div>
+          </div>
         </div>
-        <div
-          className="box"
-          style={{ width: "50%", float: "right", height: "300px" }}
-        >
-          <h1>
-            <span>Crop</span>
-            <button style={{ float: "right" }} onClick={getCropData}>
-              Crop Image
-            </button>
-          </h1>
-          <img style={{ width: "100%" }} src={cropData} alt="cropped" />
+
+        <div className="flex gap-2">
+          <button className="btn btn-neutral w-1/3" onClick={() => {clearCropData()}}>
+          Change Crop
+          </button>
+
+          <button className="btn btn-primary w-2/3" onClick={() => {
+            getCropData();
+            setFinalImage(cropData);
+            document.getElementById('my_modal_2').close();
+          }}>
+          Use Image
+          </button>
         </div>
+      </>
+      }
+
       </div>
       <br style={{ clear: "both" }} />
     </div>

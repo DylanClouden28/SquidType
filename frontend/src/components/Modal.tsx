@@ -4,7 +4,14 @@ import 'cropperjs/dist/cropper.css'
 
 import CropTool from './Cropper'
 
-const Modal = () => {
+interface ModalProps{
+    cropData: any;
+    setCropData: any;
+    finalImage: any;
+    setFinalImage: any;
+  }
+
+const Modal: React.FC<ModalProps> = ({cropData, setCropData, setFinalImage, finalImage}) => {
     // if (!isModalOpen){
     //     return null;
     // }
@@ -52,16 +59,15 @@ const Modal = () => {
         //     </div>
         // </div>
         <div>
-            <button className="btn btn-neutral" onClick={()=>document.getElementById('my_modal_2').showModal()}>Change Profile Picture</button>
+            <button className="btn btn-neutral mr-2" onClick={()=>document.getElementById('my_modal_2').showModal()}>Change Profile Picture</button>
                 <dialog id="my_modal_2" className="modal">
                     <div className="modal-box">
-                        <h3 className="font-bold text-lg">Hello!</h3>
-                        <p className="py-4">Press ESC key or click outside to close</p>
-                        <div className='text-xl font-semibold'>
+                        <h3 className="font-bold text-lg">Change your profile picture below!</h3>
+                        <div className='text-md font-semibold'>
                             Upload Image:
                         </div>
                         {/* <input type="file" onChange={handleFileUpload} /> */}
-                        <CropTool />
+                        <CropTool cropData={cropData} setCropData={setCropData} setFinalImage={setFinalImage} finalImage={finalImage}/>
                     </div>
                     <form method="dialog" className="modal-backdrop">
                         <button>close</button>

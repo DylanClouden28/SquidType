@@ -34,6 +34,8 @@ function home(){
     const [currentMessage, setCurrentMessage] = useState(null)
     const [messageInput, setMessageInput] = useState("")
     const [isEmojiDropDown, setEmojiDropDown] = useState(false);
+    const [finalImage, setFinalImage] = useState("");
+    const [cropData, setCropData] = useState("");
     const nav = useNavigate();
 
     // const [isModalOpen, setIsModalOpen] = useState(false);
@@ -191,6 +193,16 @@ function home(){
         Element.scrollIntoView({behavior: "smooth"})
     }
 
+    const getImageSrc = () => {
+        if (finalImage) {
+            return finalImage;
+        }
+        if (username){
+            return `http://localhost:8000/public/images/${username}.png`;
+        }
+        return LiterallyHim;
+    }
+
     // const getPFP = async () => {
     //     try{
     //         const response = await fetch(`http://localhost:8000/public/images/${username}.png`, {
@@ -215,14 +227,18 @@ function home(){
                 <img className="p-0 w-10 h-10" src={LiterallyHim} />
             </div>
             <div className="navbar-end">
-                <img
-                    className="p-0 w-10 h-10"
-                    src={username ? `http://localhost:8000/public/images/${username}.png` : LiterallyHim}
-                />
                 <h1 className='text-2xl px-4'>{username}</h1>
+                <div className="avatar">
+                    <div className="rounded-full mr-2 w-14 h-14">
+                    <img
+                        className="p-0"
+                        src={getImageSrc()}
+                    />
+                    </div>
+                </div>
+                <Modal cropData={cropData} setCropData={setCropData} setFinalImage={setFinalImage} finalImage={finalImage}/>
                 <button className='btn btn-neutral' onClick={signOut}>Signout</button>
                 {/* <button className='btn btn-neutral' onClick={openModal}>Open Modal</button> */}
-                <Modal />
             </div>
             </div>
             <div className="grid justify-items-center">
@@ -245,14 +261,14 @@ function home(){
                             <div className={username === message?.user ? "chat chat-end" : "chat chat-start"}>
                                 <div className="chat-image avatar">
                                     <div className="w-10 rounded-full">
-                                    <img alt="Tailwind CSS chat bubble component" src={username === message?.user ? `http://localhost:8000/public/images/${username}.png`: `http://localhost:8000/public/images/${message?.user}.png`} />
+                                    <img alt="Tailwind CSS chat bubble component" src={username === message?.user ? getImageSrc(): `http://localhost:8000/public/images/${message?.user}.png`} />
                                     </div>
                                 </div>
                                 <div className={username === message?.user ? "chat-header mr-2" : "chat-header ml-2"}>
                                 {message?.user}
-                                <time className="text-xs opacity-50 px-1">{new Date(message?.date)?.toLocaleString("en-US", {hour: "2-digit", minute: "2-digit"})}</time>
+                                <time className="text-xs opacity-50 mx-1">{new Date(message?.date)?.toLocaleString("en-US", {hour: "2-digit", minute: "2-digit"})}</time>
                                 </div>
-                                <div className="chat-bubble m-1 hover:bg-base-100" id={message.uuid} role="button" onClick={() => {
+                                <div className="chat-bubble hover:bg-base-100" id={message.uuid} role="button" onClick={() => {
                                     setEmojiDropDown(!isEmojiDropDown);
                                     setCurrentMessage(message?.uuid);
                                     }}>
@@ -262,7 +278,7 @@ function home(){
                                     </div>
                                 <div className="chat-footer">
                                     {message?.reaction && message?.reaction !== null && message.reaction.map(reaction => 
-                                    <div className="badge badge-neutral mx-1 tooltip" data-tip={reaction?.username}>
+                                    <div className="badge badge-neutral mx-1 mt-1 tooltip" data-tip={reaction?.username}>
                                         <span >{reaction?.emoji}</span>
                                     </div>
                                     )}
