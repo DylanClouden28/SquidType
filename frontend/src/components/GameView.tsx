@@ -53,6 +53,13 @@ const GameView = () => {
 
     return(
         <div>
+        <div className="flex justify-center items-center mb-4">
+            <div className="card bg-base-100 h-16 rounded-full w-1/5 flex justify-center items-center flex-row gap-x-6">
+                <div className="w-12 h-12 bg-green-600 rounded-full"></div>
+                <div className="w-12 h-12 bg-yellow-600 rounded-full"></div>
+                <div className="w-12 h-12 bg-red-600 rounded-full"></div>
+            </div>
+        </div>
         <div className="flex flex-col w-full justify-center items-center gap-y-6 h-96 overflow-auto">
             {mockUsers.map(user => 
                 <div id={`progess_${user}`} className="flex flex-row bg-base-100 p-2 card w-5/6">
