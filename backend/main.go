@@ -4,6 +4,7 @@ import (
 	//"net/http"
 	"fmt"
 	"sluggers/controller"
+	"sluggers/game"
 	"sluggers/messages"
 	"time"
 
@@ -36,6 +37,7 @@ func main() {
 	}))
 	controller.Route(r)
 	messages.Route(r)
+	game.Route(r)
 	r.Static("/public/images", "./public/images")
 	r.Run(":8000")
 }
