@@ -3,6 +3,7 @@ import LiterallyHim from '../assets/LiterallyHim.jpg'
 import EmojiPicker from 'emoji-picker-react';
 import React, { useEffect, useState } from 'react';
 import GameView from '../components/GameView';
+import Logo from '../assets/SquidType.png'
 import { useNavigate } from 'react-router-dom';
 
 import Modal from '../components/Modal'
@@ -226,7 +227,8 @@ function home(){
         <div className="p-4 bg-base-300 min-h-screen" data-theme="night">
             <div className="navbar bg-base-100 rounded-box shadow-xl mb-10 p-4">
             <div className="navbar-start">
-                <img className="p-0 w-10 h-10" src={LiterallyHim} />
+                {/* <p className='font-Consolas'><span className='text-error text-bold px-2 text-4xl '>SQUID </span><span className='text-bold text-4xl'> TYPE</span></p> */}
+                <img className='ml-4 w-32'src={Logo} alt="SquidType"></img>
             </div>
             <div className="navbar-end">
                 <h1 className='text-2xl px-4'>{username}</h1>
@@ -249,7 +251,7 @@ function home(){
                     <GameView />
                 </div>
 
-                <div className="grid justify-items-center w-1/3">
+                <div className="grid justify-items-center w-1/3 h-10">
                     {isHelp && 
                     <div role="alert" className="alert alert-info max-w-2xl mb-5">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -262,8 +264,8 @@ function home(){
                     </div>
                     }
 
-                    <div className="card w-5/6 shadow-2xl bg-base-200">
-                        <div className={isHelp ? "chatBox p-2 h-[20rem] 2xl:h-[22rem] overflow-auto overflow-x-hidden" : "chatBox p-2 h-[25rem] lg:h-[28rem] 2xl:h-[36rem] overflow-auto overflow-x-hidden"}>
+                    <div className="card w-5/6 shadow-2xl bg-base-200 p-4">
+                        <div className={isHelp ? "chatBox p-2 h-[20rem] 2xl:h-[32rem] overflow-auto overflow-x-hidden" : "chatBox p-2 h-[25rem] lg:h-[28rem] 2xl:h-[38rem] overflow-auto overflow-x-hidden"}>
                                 { messages.length > 0 && messages.map(message =>
                                 <div className={username === message?.user ? "chat chat-end" : "chat chat-start"}>
                                     <div className="chat-image avatar">
