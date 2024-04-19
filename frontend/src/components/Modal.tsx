@@ -1,6 +1,13 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Cropper from 'react-cropper'
 import 'cropperjs/dist/cropper.css'
+
+import LiterallyHim from '../assets/LiterallyHim.jpg'
+import squid1 from '../assets/squid1.jpg'
+import squid2 from '../assets/squid2.jpg'
+import squid3 from '../assets/squid3.jpg'
+import squid4 from '../assets/squid4.jpg'
+import squid5 from '../assets/squid5.jpg'
 
 import CropTool from './Cropper'
 
@@ -12,6 +19,7 @@ interface ModalProps{
   }
 
 const Modal: React.FC<ModalProps> = ({cropData, setCropData, setFinalImage, finalImage}) => {
+    const [image, setImage] = useState();
     // if (!isModalOpen){
     //     return null;
     // }
@@ -63,11 +71,20 @@ const Modal: React.FC<ModalProps> = ({cropData, setCropData, setFinalImage, fina
                 <dialog id="my_modal_2" className="modal">
                     <div className="modal-box">
                         <h3 className="font-bold text-lg">Change your profile picture below!</h3>
+                        <div className="grid grid-cols-3 gap-y-4">
+                            <img className='btn h-fit w-fit' src={squid1} onClick={() => setImage(squid1)}></img>
+                            <img className='btn h-fit w-fit' src={squid2} onClick={() => setImage(squid2)}></img>
+                            <img className='btn h-fit w-fit' src={squid3} onClick={() => setImage(squid3)}></img>
+                            <img className='btn h-fit w-fit' src={squid4} onClick={() => setImage(squid4)}></img>
+                            <img className='btn h-fit w-fit' src={squid5} onClick={() => setImage(squid5)}></img>
+                            <img className='btn h-fit w-fit' src={LiterallyHim} onClick={() => setImage(LiterallyHim)}></img>
+                        </div>
+                        <h3 className="font-bold text-lg">OR:</h3>
                         <div className='text-md font-semibold'>
                             Upload Image:
                         </div>
                         {/* <input type="file" onChange={handleFileUpload} /> */}
-                        <CropTool cropData={cropData} setCropData={setCropData} setFinalImage={setFinalImage} finalImage={finalImage}/>
+                        <CropTool cropData={cropData} setCropData={setCropData} setFinalImage={setFinalImage} finalImage={finalImage} image={image} setImage={setImage}/>
                     </div>
                     <form method="dialog" className="modal-backdrop">
                         <button>close</button>
