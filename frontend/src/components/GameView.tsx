@@ -1,32 +1,39 @@
 import { useState } from "react"
 import goSound from '../assets/goSound.mp3'
 import Fireworks from './FireWork'
+import { GameState } from "../interfaces/game"
+
+interface gameViewProps {
+    gameState: GameState
+    setGameState: React.Dispatch<React.SetStateAction<GameState>>
+}
 
 
-
-const GameView = () => {
+const GameView: React.FC<gameViewProps> = ({gameState, setGameState}) => {
     
     const mockUsers = ['User1', "Dylan", "Chris", "Steve", "Steve", "Steve", "Steve"]
 
-    const [typeInput, setInputValue] = useState('');
     const [counter, setCounter]= useState(0);
-    const [stopLight, setStopLight] = useState<'off' | 'red' | 'green' | 'yellow'>('off')
-    const handleInputChange = (e) => {
-        setInputValue(e.target.value);
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setGameState(prevState => ({
+            ...prevState,
+            currentParagraph: e.target.value
+        }))
     }
 
-    const testTypingText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
 
+ 
     const comparisonText = () =>{
         let text = [];
         let error = false;
-        for (let i =0; i < testTypingText.length; i++){
-            const truthChar = testTypingText[i];
+        for (let i =0; i < gameState.TargetParagraph.length; i++){
+            const truthChar = gameState.TargetParagraph[i];
             let acutalChar = undefined;
 
 
-            if (typeInput.length > i){
-                acutalChar = typeInput[i];
+            if (gameState.currentParagraph.length > i){
+                acutalChar = gameState.currentParagraph[i];
             }
 
             if (acutalChar === undefined){
@@ -58,9 +65,9 @@ const GameView = () => {
 
         return(
             <div className="card bg-base-100 h-16 rounded-full w-1/5 flex justify-center items-center flex-row gap-x-6">
-                <div className={stopLight === 'green'? "w-12 h-12 bg-green-600 brightness-200 rounded-full" : "w-12 h-12 bg-green-600 rounded-full bg-opacity-20"}></div>
-                <div className={stopLight === 'yellow'? "w-12 h-12 bg-yellow-600 brightness-200 rounded-full" : "w-12 h-12 bg-yellow-600 rounded-full bg-opacity-20"}></div>
-                <div className={stopLight === 'red'? "w-12 h-12 bg-red-600 brightness-200 rounded-full" : "w-12 h-12 bg-red-600 rounded-full bg-opacity-20"}></div>
+                <div className={gameState.currentLight === 'green'? "w-12 h-12 bg-green-600 brightness-200 rounded-full" : "w-12 h-12 bg-green-600 rounded-full bg-opacity-20"}></div>
+                <div className={gameState.currentLight === 'yellow'? "w-12 h-12 bg-yellow-600 brightness-200 rounded-full" : "w-12 h-12 bg-yellow-600 rounded-full bg-opacity-20"}></div>
+                <div className={gameState.currentLight === 'red'? "w-12 h-12 bg-red-600 brightness-200 rounded-full" : "w-12 h-12 bg-red-600 rounded-full bg-opacity-20"}></div>
             </div>);
     }
 
@@ -72,7 +79,7 @@ const GameView = () => {
                 clearInterval(id);
             }
             setCounter(counter - 1);
-        })
+        }) 
     }
 
     return(
@@ -103,7 +110,7 @@ const GameView = () => {
                 {comparisonText()}
                 </p>
             </div>
-            <input value={typeInput} onPaste={(e) => {e.preventDefault();}} onChange={handleInputChange} placeholder="Start typing here" className="input input-md input-bordered"></input>
+            <input value={gameState.currentParagraph} onPaste={(e) => {e.preventDefault();}} onChange={handleInputChange} placeholder="Start typing here" className="input input-md input-bordered"></input>
         </div>
         
         <button className="btn btn-primary" onClick={startCountDown}></button>

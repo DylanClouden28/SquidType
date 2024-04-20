@@ -1,43 +1,106 @@
 import sendIcon from '../assets/send-svgrepo-com.svg'
 import LiterallyHim from '../assets/LiterallyHim.jpg'
 import EmojiPicker from 'emoji-picker-react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import GameView from '../components/GameView';
 import Logo from '../assets/SquidType.png'
 import { useNavigate } from 'react-router-dom';
+import useWebSocket from 'react-use-websocket';
 
 import Modal from '../components/Modal'
 
 import '../App.css'
 
+import {GameState, Player} from '../interfaces/game'
+
+const CONNECTION_STATUS_CONNECTING: number = 0;
+const CONNECTION_STATUS_OPEN: number =  1;
+const CONNECTION_STATUS_CLOSING: number  = 2;
+const CONNECTION_STATUS_CLOSED: number  = 3;
+
+
 function home(){
-
-    // const mockData = [{user: "bob",
-    //         content: "hello",
-    //         Date: new Date(Date.now()),
-    //         reaction: [{
-    //             username: "otheruser",
-    //             emoji: "😀",
-    //             messageId: "123123123"
-    //         },
-    //         {
-    //             username: "chris",
-    //             emoji: "😀",
-    //             messageId: "123123123"
-    //         }
-    //     ],
-    //         id: "jklasdfasdfasdf"  
-    //     },]
-
     const [emoji, setEmoji] = useState(null)
     const [messages, setMessages] = useState([])
     const [isHelp, setIsHelp] = useState(true);
-    const [username, setUsername] = useState("")
+    const [username, setUsername] = useState("");
     const [currentMessage, setCurrentMessage] = useState(null)
     const [messageInput, setMessageInput] = useState("")
     const [isEmojiDropDown, setEmojiDropDown] = useState(false);
     const [finalImage, setFinalImage] = useState("");
     const [cropData, setCropData] = useState("");
+
+    const [gameState, setGameState] = useState<GameState>({
+        Players: [],
+        currentRound: 0,
+        currentLight: 'off',
+        TargetParagraph: '',
+        currentParagraph: '',
+    })
+
+    const options = useMemo(() => ({
+        onMessage: (message) => {
+            console.log("Recieved message", message.data)
+            handleNewMessage(message.data)
+        },
+        onClose: event => console.log('onClose', event),
+        onError: error => console.log('onError', error),
+        onOpen: event => console.log('onOpen', event),
+    }),[]);
+    
+
+    const {sendMessage, lastMessage, readyState} = useWebSocket('wss://echo.websocket.org', options);
+    
+    const connectionStatus = {
+        [CONNECTION_STATUS_CONNECTING]: 'Connecting',
+        [CONNECTION_STATUS_OPEN]: 'Open',
+        [CONNECTION_STATUS_CLOSING]: 'Closing',
+        [CONNECTION_STATUS_CLOSED]: 'Closed',
+      }[readyState];
+    
+    const handleNewMessage = (message: string) => {
+        
+        try {
+            const resultJson = JSON.parse(message);
+            console.log("Recieved json over websocket:", resultJson)
+            if (resultJson.messageType !== undefined){
+                console.log("MessageType was no defined in websocket data");
+                return
+            }
+            const messageType = resultJson.messageType;
+
+            if (messageType == "roundStart"){
+                console.log("Recvied roundStart")
+            }
+
+            if (messageType == "gameUpdate"){
+                console.log("Recevied gameUpdate")
+                const newGameState: GameState = {
+                    Players: resultJson?.Players,
+                    currentRound: resultJson?.currentRound,
+                    currentLight: resultJson?.currentLight,
+                    TargetParagraph: resultJson?.TargetMessage,
+                    currentParagraph: gameState.currentParagraph,
+                }
+                setGameState(newGameState)
+            }
+        }
+        catch (error){
+            console.log("Error handling new websocket message", error)
+        }
+
+    }
+
+    const handleTypingMessage = useCallback(() => {
+        const message = JSON.stringify({
+            messageType: 'input',
+            text: gameState?.currentParagraph
+        })
+        sendMessage(message);
+    }, []);
+
+    
+    
     const nav = useNavigate();
 
     // const [isModalOpen, setIsModalOpen] = useState(false);
@@ -121,7 +184,7 @@ function home(){
         }
     }
 
-    const sendMessage = async (message: string) => {
+    const sendTextMessage = async (message: string) => {
         try{
             if (message == ''){
                 return
@@ -205,24 +268,6 @@ function home(){
         return LiterallyHim;
     }
 
-    // const getPFP = async () => {
-    //     try{
-    //         const response = await fetch(`http://localhost:8000/public/images/${username}.png`, {
-    //           method: "POST",
-    //           mode: 'cors',
-    //           credentials: "include"
-    //         })
-    //         if (!response.ok){
-    //           const {err} = await response.json()
-    //           console.log(err)
-    //         }
-            
-    //       } catch (error){
-    //           console.log(error)
-    //       }
-    // }
-
-
     return(
         <div className="p-4 bg-base-300 min-h-screen" data-theme="night">
             <div className="navbar bg-base-100 rounded-box shadow-xl mb-10 p-4">
@@ -248,7 +293,7 @@ function home(){
 
             <div className='flex'>
                 <div className='w-2/3'>
-                    <GameView />
+                    <GameView gameState={gameState} setGameState={setGameState}/>
                 </div>
 
                 <div className="grid justify-items-center w-1/3 h-10">
@@ -299,7 +344,7 @@ function home(){
                         <div className="card-body p-2">
                             <div className="flex">
                                 <input className="input max-sm:input-sm input-bordered flex-grow mx-2" placeholder="Type here" value={messageInput} type="text" onChange={e => {setMessageInput(e.target.value)}}/>
-                                <img onClick={() => {sendMessage(messageInput)}} className="btn max-sm:btn-sm btn-accent p-2" src={sendIcon}></img>
+                                <img onClick={() => {sendTextMessage(messageInput)}} className="btn max-sm:btn-sm btn-accent p-2" src={sendIcon}></img>
                             </div>
                         </div>
                         <div className="dropdown dropdown-top dropdown-end">
