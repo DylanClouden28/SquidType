@@ -8,10 +8,11 @@ interface CropProps{
   setCropData: any;
   finalImage: any;
   setFinalImage: any;
+  image: any;
+  setImage: any;
 }
 
-export const CropTool: React.FC<CropProps> = ({cropData, setCropData, finalImage, setFinalImage}) => {
-  const [image, setImage] = useState();
+export const CropTool: React.FC<CropProps> = ({cropData, setCropData, finalImage, setFinalImage, image, setImage}) => {
   const [isSelected, setSelected]= useState(false);
   const cropperRef = useRef<ReactCropperElement>(null);
   

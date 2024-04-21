@@ -1,6 +1,7 @@
 import { useState} from 'react'
 import { useNavigate } from 'react-router-dom';
 import LiterallyHim from '../assets/LiterallyHim.jpg'
+import squidType from '../assets/squidType3.png'
 
 
 function App() {
@@ -94,43 +95,49 @@ function App() {
     <div data-theme="night">
     <div className="hero min-h-screen bg-base-200 justify-center" id='login'>
       <div className="hero-content flex-col lg:flex-row-reverse">
-        <div className="text-center lg:text-left">
-          <div className="w-64 h-64 p-4 pb-10 shadow-xl">
-            <img className="" src={LiterallyHim} />
+        <div className="text-center lg:text-left flex flex-col justify-center items-center">
+          <div className="w-96 h-96 p-4 pb-10 shadow-xl">
+            <img className="" src={squidType} />
           </div>
-          <h1 className="text-5xl font-bold text-primary pt-4 ">Login now!</h1>
-          <p className='text-3xl font-bold'>Don't have account   <button onClick={signUpScroll} className='btn btn-lg btn-outline btn-accent text-5xl font-bold italic '>Sign Up!</button></p>
+          <div className='flex flex-col justify-center items-center'>
+            <p className='text-3xl font-bold pt-4'>Don't have account   </p>
+            <button onClick={signUpScroll} className='btn btn-lg btn-outline btn-error text-5xl font-bold italic '>Sign Up!</button>
+          </div>
         </div>
-        <div className="card shrink-0 w-full max-w-sm shadow-2xl bg-base-100">
-          <div className="card-body">
-            {isAlertLogin.length !== 0 && 
-            <div role="alert" className="alert alert-warning">
-              <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-              <span>{isAlertLogin}</span>
-              <div>
-                <button onClick={() => {closeAlert(setAlertLogin)}} className="btn btn-ghost btn-sm">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
+        <div className='flex flex-col justify-center items-center'>
+          <h1 className="text-5xl font-bold text-success py-4 ">Login now!</h1>
+          <div className="card shrink-0 w-full max-w-sm shadow-2xl bg-base-100">
+            <div className="card-body">
+              {isAlertLogin.length !== 0 && 
+              <div role="alert" className="alert alert-warning">
+                <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                <span>{isAlertLogin}</span>
+                <div>
+                  <button onClick={() => {closeAlert(setAlertLogin)}} className="btn btn-ghost btn-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                  </button>
+                </div>
+              </div>
+              }
+
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Username</span>
+                </label>
+                <input onChange={e => setLoginForm({username: e.target.value, password: loginForm.password})} value={loginForm.username} type="username" placeholder="username" className="input input-bordered" required />
+              </div>
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Password</span>
+                </label>
+                <input onChange={e => setLoginForm({username: loginForm.username, password: e.target.value})} value={loginForm.password} type="password" placeholder="password" className="input input-bordered" required />
+              </div>
+              <div className="form-control mt-6">
+                <button onClick={tryLogin} className="btn btn-success">Login</button>
               </div>
             </div>
-            }
-
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Username</span>
-              </label>
-              <input onChange={e => setLoginForm({username: e.target.value, password: loginForm.password})} value={loginForm.username} type="username" placeholder="username" className="input input-bordered" required />
-            </div>
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Password</span>
-              </label>
-              <input onChange={e => setLoginForm({username: loginForm.username, password: e.target.value})} value={loginForm.password} type="password" placeholder="password" className="input input-bordered" required />
-            </div>
-            <div className="form-control mt-6">
-              <button onClick={tryLogin} className="btn btn-primary">Login</button>
-            </div>
           </div>
+
         </div>
     </div>
   </div>

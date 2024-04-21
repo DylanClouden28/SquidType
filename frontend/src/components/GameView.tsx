@@ -1,102 +1,193 @@
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import goSound from '../assets/goSound.mp3'
+import Fireworks from './FireWork'
+import deadSkull from '../assets/deadSkull.png'
+import { GameState, Player } from "../interfaces/game"
+
+interface gameViewProps {
+    gameState: GameState
+    setGameState: React.Dispatch<React.SetStateAction<GameState>>
+    username: string
+}
 
 
-const GameView = () => {
+const GameView: React.FC<gameViewProps> = ({gameState, setGameState, username}) => {
     
     const mockUsers = ['User1', "Dylan", "Chris", "Steve", "Steve", "Steve", "Steve"]
 
-    const [typeInput, setInputValue] = useState('');
-    const handleInputChange = (e) => {
-        setInputValue(e.target.value);
+    const typeBox = useRef(null);
+
+    const [counter, setCounter]= useState(-1);
+
+    const [myWPM, setMyWPM] = useState(0);
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setGameState(prevState => ({
+            ...prevState,
+            currentParagraph: e.target.value
+        }))
     }
 
-    const testTypingText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+    const sortedPlayers = gameState.Players.sort((a, b) => {
+        return Number(b.CurrentPercentage) - Number(a.CurrentPercentage)
+    })
 
+    const isCurrentPlayer = (player: Player) => {
+        return player.Username === username;
+    }
+
+    useEffect(() => {
+        const myPlayer = gameState.Players.find(isCurrentPlayer)
+        if (myPlayer === undefined){
+            return
+        }
+
+        setMyWPM(myPlayer.WPM);
+    }, [gameState.Players])
+
+ 
     const comparisonText = () =>{
         let text = [];
         let error = false;
-        for (let i =0; i < testTypingText.length; i++){
-            const truthChar = testTypingText[i];
+        let leadUser = undefined
+        let leadUserTextLength = undefined
+        if (sortedPlayers.length > 0){
+            leadUser = sortedPlayers[0];
+            leadUserTextLength = gameState.TargetParagraph.length * Number(leadUser.CurrentPercentage) / 100;
+        }
+        // console.log("Lead user lenth", leadUserTextLength)
+        for (let i =0; i < gameState.TargetParagraph.length; i++){
+            const truthChar = gameState.TargetParagraph[i];
             let acutalChar = undefined;
+            let drawLeadUser = leadUserTextLength ? (leadUserTextLength > i ? true : false) : false
 
 
-            if (typeInput.length > i){
-                acutalChar = typeInput[i];
+            if (gameState.currentParagraph.length > i){
+                acutalChar = gameState.currentParagraph[i];
             }
 
             if (acutalChar === undefined){
                 // console.log("Undefined")
-                text.push(<span className="text-base-content" key={i}>{truthChar}</span>);
+                text.push(<span className={drawLeadUser ? "text-base-content underline underline-offset-8": "text-base-content"} key={i}>{truthChar}</span>);
             }
             else if(truthChar !== acutalChar){
                 // console.log("Error")
                 if (truthChar === " "){
-                    text.push(<span className="text-error" key={i}>_</span>);
+                    text.push(<span className={drawLeadUser ? "text-error underline underline-offset-8": "text-error"}key={i}>_</span>);
                 }else{
-                    text.push(<span className="text-error" key={i}>{truthChar}</span>);
+                    text.push(<span className={drawLeadUser ? "text-error underline underline-offset-8": "text-error"} key={i}>{truthChar}</span>);
                 }
                 error = true
             }
             else{
                 if (error === true){
-                    text.push(<span className="text-error" key={i}>{truthChar}</span>);
+                    text.push(<span className={drawLeadUser ? "text-error underline underline-offset-8": "text-error"} key={i}>{truthChar}</span>);
                     continue
                 }
-                text.push(<span className="text-success" key={i}>{truthChar}</span>);
+                text.push(<span className={drawLeadUser ? "text-success underline underline-offset-8": "text-success"}key={i}>{truthChar}</span>);
             }
         }
         // console.log(text)
         return text;
     }   
 
+    const CurrentLights = () =>{
+
+        return(
+            <div className="card bg-base-100 h-16 rounded-full w-1/5 flex justify-center items-center flex-row gap-x-6">
+                <div className={gameState.currentLight === 'green'? "w-12 h-12 bg-green-600 brightness-200 rounded-full" : "w-12 h-12 bg-green-600 rounded-full bg-opacity-20"}></div>
+                <div className={gameState.currentLight === 'yellow'? "w-12 h-12 bg-yellow-600 brightness-200 rounded-full" : "w-12 h-12 bg-yellow-600 rounded-full bg-opacity-20"}></div>
+                <div className={gameState.currentLight === 'red'? "w-12 h-12 bg-red-600 brightness-200 rounded-full" : "w-12 h-12 bg-red-600 rounded-full bg-opacity-20"}></div>
+            </div>);
+    }
+
+    const startCountDown = () => {
+        setCounter(3);
+        document.getElementById("gostart").play();
+    
+        const id = setInterval(() => {
+            setCounter((prevCount) => {
+                if (prevCount === -1){
+                    clearInterval(id)
+                }
+                if (prevCount === 0){
+                    typeBox.current.focus();
+                }
+                return prevCount - 1;
+            })
+        }, 1000) 
+    }
+    let playersleft = 0;
+    const playersLeftCounter = sortedPlayers.forEach((player) => {
+        if (!player.IsDead){
+            playersleft += 1;
+        }
+    })
+
     return(
         <div>
         <div className="flex justify-center items-center mb-4">
-            <div className="card bg-base-100 h-16 rounded-full w-1/5 flex justify-center items-center flex-row gap-x-6">
-                <div className="w-12 h-12 bg-green-600 rounded-full"></div>
-                <div className="w-12 h-12 bg-yellow-600 rounded-full"></div>
-                <div className="w-12 h-12 bg-red-600 rounded-full"></div>
-            </div>
+            <CurrentLights/>
         </div>
-        <div className="flex flex-col w-full justify-center items-center gap-y-6 h-96 overflow-auto">
-            {mockUsers.map(user => 
-                <div id={`progess_${user}`} className="flex flex-row bg-base-100 p-2 card w-5/6">
+        <div>
+            <h1 className="text font-mono text-2xl text-center">Players Left <span className="countdown font-mono text-success text-xl">
+            <span style={{"--value":playersleft}}></span>
+            </span></h1>
+        </div>
+        <div className="flex flex-col w-full justify-center items-center gap-y-6 h-96 overflow-y-auto pt-64">
+            {sortedPlayers.map(Player => 
+                <div id={`progess_${Player.Username}`} className="flex flex-row bg-base-100 p-2 card w-5/6">
                     <div className="avatar flex flex-col h-16 w-16">
                         <div className="rounded-full">
-                        <img src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
+                        <img src={`http://localhost:8000/public/images/${Player.Username}.png`} alt="no profile" />
                         </div>
                     </div>
-                    <div className="flex flex-col justify-center items-center mx-2 w-full">
-                        {user}
-                        <progress className="progress progress-success w-full h-10" value="60" max="100">asdas</progress>
+                    <div className="flex flex-col text-xl justify-center items-center mx-2 w-full">
+                        {Player.IsDead ? "💀 " + Player.Username : Player.Username}
+                        <progress 
+                        className={Player.IsDead ? "progress progress-error w-full h-5 transition-all duration-150 ease-in-out": 
+                        "progress progress-success w-full h-5 transition-all duration-150 ease-in-out"} 
+                        value={Player.CurrentPercentage} max="100">     
+                        </progress>
+                    </div>
+                    <div className="flex flex-col justify-center items-center">
+                        <span className="font-bold">WPM</span>
+                        <span className="italic">{Player.WPM}</span>
                     </div>
                 </div>
 
             )}
         </div>
 
-        <div id="typing" className="card bg-base-100 p-4 mt-4 mx-10 h-48">
+        <div id="typing" className="card bg-base-100 p-4 mt-4 mx-10 h-fit">
+            <div className="text-center">
+                <span className="text-2xl font-bold italic text-accent">WPM: <span className="not-italic text-neutral-content">{myWPM}</span></span>
+            </div>
             <div className="p-4">
                 <p>
                 {comparisonText()}
                 </p>
             </div>
-            <input value={typeInput} onPaste={(e) => {e.preventDefault();}} onChange={handleInputChange} placeholder="Start typing here" className="input input-md input-bordered"></input>
+            <input ref={typeBox} value={gameState.currentParagraph} onPaste={(e) => {e.preventDefault();}} onChange={handleInputChange} placeholder="Start typing here" className="input input-md input-bordered"></input>
+        </div> 
+        
+        <button className="btn btn-primary" onClick={startCountDown}>Start CountDown</button>
+        <audio id="gostart"><source src={goSound}></source></audio>
+        {counter > -1 &&
+        
+            <div className="inset-0 z-10 fixed flex items-center justify-center p-4">
+                <p className="text-9xl font-bold bg-base-300"></p>
+                <span className="countdown">
+                <span className="text-9xl" style={{"--value":counter}}></span>
+                </span>
+            </div>
+        
+        }
+        <div className="z-0">
+            {/* <Fireworks /> */}
+        </div>
         </div>
 
-        <button className="btn btn-primary" onClick={() => {
-            // console.log(document.getElementById("gostart"));
-            document.getElementById("gostart").play();
-            }}>Test Start</button>
-        <audio id="gostart"><source src={goSound}></source></audio>
-        {/* <div className="inset-0 z-10 fixed flex items-center justify-center p-4">
-            <p className="text-9xl font-bold bg-base-300"></p>
-            <span className="countdown">
-            <   span className="text-9xl" style={{"--value":3}}></span>
-            </span>
-        </div> */}
-        </div>
     )
 }
 
