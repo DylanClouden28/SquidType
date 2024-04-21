@@ -26,7 +26,7 @@ const mockPlayers: Player[] = [
         IsDead: true,
         CurrentPercentage: "90",
         isReady: false,
-        WPM: 30,
+        WPM: 40,
         lastRoundWPM: 50,
     },
     {
@@ -34,7 +34,7 @@ const mockPlayers: Player[] = [
         IsDead: false,
         CurrentPercentage: "40",
         isReady: false,
-        WPM: 30,
+        WPM: 50,
         lastRoundWPM: 70,
     },
     {
@@ -42,7 +42,7 @@ const mockPlayers: Player[] = [
         IsDead: false,
         CurrentPercentage: "50",
         isReady: false,
-        WPM: 30,
+        WPM: 60,
         lastRoundWPM: 50,
     },
     {
@@ -50,7 +50,7 @@ const mockPlayers: Player[] = [
         IsDead: false,
         CurrentPercentage: "30",
         isReady: false,
-        WPM: 30,
+        WPM: 70,
         lastRoundWPM: 30,
     },
     {
@@ -58,7 +58,7 @@ const mockPlayers: Player[] = [
         IsDead: false,
         CurrentPercentage: "30",
         isReady: false,
-        WPM: 30,
+        WPM: 80,
         lastRoundWPM: 20,
     },
     {
@@ -66,7 +66,7 @@ const mockPlayers: Player[] = [
         IsDead: false,
         CurrentPercentage: "30",
         isReady: false,
-        WPM: 30,
+        WPM: 90,
         lastRoundWPM: 10,
     },
 ]
@@ -85,10 +85,10 @@ function home(){
     const [gameState, setGameState] = useState<GameState>({
         Players: mockPlayers,
         currentRound: 0,
-        currentLight: 'off',
+        currentLight: 'green',
         TargetParagraph: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
         currentParagraph: '',
-        currentState: 'winner',
+        currentState: 'game',
         countDown: 60,
     })
 

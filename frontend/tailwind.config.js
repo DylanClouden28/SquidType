@@ -5,13 +5,14 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
     "./Pages/**/*.{js,ts,jsx,tsx}",
   ],
-  theme: {
-    colors : {
-      'gold': '#FFD700',
-      'bronze': '#CD7F32',
-      'silver': '#C0C0C0',
+  theme: {    
+    extend: {
+      colors : {
+        'gold': '#FFD700',
+        'bronze': '#CD7F32',
+        'silver': '#C0C0C0',
+      },
     },
-    extend: {},
   },
   daisyui: {
     themes: [

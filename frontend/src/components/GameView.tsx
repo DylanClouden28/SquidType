@@ -1,22 +1,25 @@
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import goSound from '../assets/goSound.mp3'
 import Fireworks from './FireWork'
 import deadSkull from '../assets/deadSkull.png'
-import { GameState } from "../interfaces/game"
+import { GameState, Player } from "../interfaces/game"
 
 interface gameViewProps {
     gameState: GameState
     setGameState: React.Dispatch<React.SetStateAction<GameState>>
+    username: string
 }
 
 
-const GameView: React.FC<gameViewProps> = ({gameState, setGameState}) => {
+const GameView: React.FC<gameViewProps> = ({gameState, setGameState, username}) => {
     
     const mockUsers = ['User1', "Dylan", "Chris", "Steve", "Steve", "Steve", "Steve"]
 
     const typeBox = useRef(null);
 
     const [counter, setCounter]= useState(-1);
+
+    const [myWPM, setMyWPM] = useState(0);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setGameState(prevState => ({
@@ -29,6 +32,18 @@ const GameView: React.FC<gameViewProps> = ({gameState, setGameState}) => {
         return Number(b.CurrentPercentage) - Number(a.CurrentPercentage)
     })
 
+    const isCurrentPlayer = (player: Player) => {
+        return player.Username === username;
+    }
+
+    useEffect(() => {
+        const myPlayer = gameState.Players.find(isCurrentPlayer)
+        if (myPlayer === undefined){
+            return
+        }
+
+        setMyWPM(myPlayer.WPM);
+    }, [gameState.Players])
 
  
     const comparisonText = () =>{
@@ -135,12 +150,19 @@ const GameView: React.FC<gameViewProps> = ({gameState, setGameState}) => {
                         value={Player.CurrentPercentage} max="100">     
                         </progress>
                     </div>
+                    <div className="flex flex-col justify-center items-center">
+                        <span className="font-bold">WPM</span>
+                        <span className="italic">{Player.WPM}</span>
+                    </div>
                 </div>
 
             )}
         </div>
 
-        <div id="typing" className="card bg-base-100 p-4 mt-4 mx-10 h-48">
+        <div id="typing" className="card bg-base-100 p-4 mt-4 mx-10 h-fit">
+            <div className="text-center">
+                <span className="text-2xl font-bold italic text-accent">WPM: <span className="not-italic text-neutral-content">{myWPM}</span></span>
+            </div>
             <div className="p-4">
                 <p>
                 {comparisonText()}

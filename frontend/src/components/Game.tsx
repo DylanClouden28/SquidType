@@ -24,7 +24,7 @@ const Game: React.FC<GameProps> = ({gameState, setGameState, username}) =>{
 
     if (gameState.currentState === 'game'){
         return(
-            <GameView gameState={gameState} setGameState={setGameState}/>
+            <GameView gameState={gameState} setGameState={setGameState} username={username}/>
         )
     }
 
