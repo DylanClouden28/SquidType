@@ -6,6 +6,11 @@ export default {
     "./Pages/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
+    colors : {
+      'gold': '#FFD700',
+      'bronze': '#CD7F32',
+      'silver': '#C0C0C0',
+    },
     extend: {},
   },
   daisyui: {

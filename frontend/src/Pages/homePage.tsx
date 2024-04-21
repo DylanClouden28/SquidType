@@ -2,7 +2,7 @@ import sendIcon from '../assets/send-svgrepo-com.svg'
 import LiterallyHim from '../assets/LiterallyHim.jpg'
 import EmojiPicker from 'emoji-picker-react';
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
-import GameView from '../components/GameView';
+import Game from '../components/Game';
 import Logo from '../assets/SquidType.png'
 import { useNavigate } from 'react-router-dom';
 import useWebSocket from 'react-use-websocket';
@@ -18,6 +18,58 @@ const CONNECTION_STATUS_OPEN: number =  1;
 const CONNECTION_STATUS_CLOSING: number  = 2;
 const CONNECTION_STATUS_CLOSED: number  = 3;
 
+const enablePolling = false;
+
+const mockPlayers: Player[] = [
+    {
+        Username: "Dylan",
+        IsDead: true,
+        CurrentPercentage: "90",
+        isReady: false,
+        WPM: 30,
+        lastRoundWPM: 50,
+    },
+    {
+        Username: "Steve",
+        IsDead: false,
+        CurrentPercentage: "40",
+        isReady: false,
+        WPM: 30,
+        lastRoundWPM: 70,
+    },
+    {
+        Username: "Steve",
+        IsDead: false,
+        CurrentPercentage: "50",
+        isReady: false,
+        WPM: 30,
+        lastRoundWPM: 50,
+    },
+    {
+        Username: "Steve",
+        IsDead: false,
+        CurrentPercentage: "30",
+        isReady: false,
+        WPM: 30,
+        lastRoundWPM: 30,
+    },
+    {
+        Username: "Steve",
+        IsDead: false,
+        CurrentPercentage: "30",
+        isReady: false,
+        WPM: 30,
+        lastRoundWPM: 20,
+    },
+    {
+        Username: "Steve",
+        IsDead: false,
+        CurrentPercentage: "30",
+        isReady: false,
+        WPM: 30,
+        lastRoundWPM: 10,
+    },
+]
 
 function home(){
     const [emoji, setEmoji] = useState(null)
@@ -31,11 +83,13 @@ function home(){
     const [cropData, setCropData] = useState("");
 
     const [gameState, setGameState] = useState<GameState>({
-        Players: [],
+        Players: mockPlayers,
         currentRound: 0,
         currentLight: 'off',
-        TargetParagraph: '',
+        TargetParagraph: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
         currentParagraph: '',
+        currentState: 'winner',
+        countDown: 60,
     })
 
     const options = useMemo(() => ({
@@ -81,6 +135,7 @@ function home(){
                     currentLight: resultJson?.currentLight,
                     TargetParagraph: resultJson?.TargetMessage,
                     currentParagraph: gameState.currentParagraph,
+                    currentState: resultJson?.currentState,
                 }
                 setGameState(newGameState)
             }
@@ -109,7 +164,9 @@ function home(){
         getUser();
         getMessages();
         console.log("Polling")
-        setInterval(() => {getMessages();}, 1000);
+        if (enablePolling){
+            setInterval(() => {getMessages();}, 1000);
+        }
     }, [])
 
     // const openModal = () => {
@@ -292,8 +349,8 @@ function home(){
             </div>
 
             <div className='flex'>
-                <div className='w-2/3'>
-                    <GameView gameState={gameState} setGameState={setGameState}/>
+                <div className='w-2/3 h-fit'>
+                    <Game gameState={gameState} setGameState={setGameState} username={username}/>
                 </div>
 
                 <div className="grid justify-items-center w-1/3 h-10">

@@ -2,6 +2,9 @@ export interface Player{
     Username: string;
     IsDead: Boolean;
     CurrentPercentage: string;
+    isReady: false;
+    WPM: number
+    lastRoundWPM: number
 }
 
 export interface GameState{
@@ -10,4 +13,6 @@ export interface GameState{
     currentLight: 'off' | 'red' | 'green' | 'yellow';
     TargetParagraph: string
     currentParagraph: string
+    currentState: 'lobby' | 'game' | 'winner' | 'betweenRound'
+    countDown: number
 }
