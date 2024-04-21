@@ -1,8 +1,6 @@
 package game
 
 import (
-	"math/rand"
-	"strings"
 	"sync"
 	"time"
 )
@@ -45,23 +43,23 @@ type roundStart struct {
 
 var GameState *gameState
 
-func incomingMessage(mess message, username string) gameUpdate {
-	completed := 0.0
-	if strings.HasPrefix(GameState.TargetMessage, mess.Typed) {
-		completed = float64(len(mess.Typed)) / float64(len(GameState.TargetMessage))
-	}
+// func incomingMessage(mess message, username string) gameUpdate {
+// 	completed := 0.0
+// 	if strings.HasPrefix(GameState.TargetMessage, mess.Typed) {
+// 		completed = float64(len(mess.Typed)) / float64(len(GameState.TargetMessage))
+// 	}
 
-	for i := 0; i < len(*GameState.Players); i++ {
-		if (*GameState.Players)[i].Username == username {
-			if (*GameState.Players)[i].CurrentPercentage < completed {
-				GameState.Lock.Lock()
-				defer GameState.Lock.Unlock()
-				(*GameState.Players)[i].CurrentPercentage = completed
-			}
-		}
-	}
-	return gameUpdate{}
-}
+// 	for i := 0; i < len(*GameState.Players); i++ {
+// 		if (*GameState.Players)[i].Username == username {
+// 			if (*GameState.Players)[i].CurrentPercentage < completed {
+// 				GameState.Lock.Lock()
+// 				defer GameState.Lock.Unlock()
+// 				(*GameState.Players)[i].CurrentPercentage = completed
+// 			}
+// 		}
+// 	}
+// 	return gameUpdate{}
+// }
 
 func GameLoop() {
 	// primary game loop
@@ -80,7 +78,7 @@ func GameLoop() {
 			(*GameState.Players)[i].CurrentPercentage = 0.0
 		}
 		GameState.TargetMessage = "Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore culpa sint ad nisi Lorem pariatur mollit ex esse exercitation amet. Nisi anim cupidatat excepteur officia. Reprehenderit nostrud nostrud ipsum Lorem est aliquip amet voluptate voluptate dolor minim nulla est proident. Nostrud officia pariatur ut officia. Sit irure elit esse ea nulla sunt ex occaecat reprehenderit commodo officia dolor Lorem duis laboris cupidatat officia voluptate. Culpa proident adipisicing id nulla nisi laboris ex in Lorem sunt duis officia eiusmod. Aliqua reprehenderit commodo ex non excepteur duis sunt velit enim. Voluptate laboris sint cupidatat ullamco ut ea consectetur et est culpa et culpa duis."
-		start := roundStart{MessageType: "roundStart", TargetMessage: GameState.TargetMessage}
+		// start := roundStart{MessageType: "roundStart", TargetMessage: GameState.TargetMessage}
 
 		GameState.Lock.Unlock()
 	}
