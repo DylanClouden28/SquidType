@@ -13,6 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"golang.org/x/crypto/bcrypt"
+	"os"
 )
 
 func Route(router *gin.Engine) {
@@ -161,6 +162,10 @@ func register(c *gin.Context) {
 	if ins_err != nil {
 		c.JSON(400, "Error creating user")
 		return
+	}
+	err = os.Link("./controller/squid1.jpg", "./public/images/"+newUser.Username+".png")
+	if err != nil {
+		fmt.Println(err)
 	}
 	c.JSON(200, "success")
 }
