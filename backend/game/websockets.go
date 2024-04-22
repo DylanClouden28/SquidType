@@ -118,7 +118,7 @@ func websocketHandler(c *gin.Context) {
 				fmt.Println(err)
 				continue
 			}
-			sendAll(string(js), context)
+			sendAll(js, context)
 			continue
 		case "reactionMessage":
 			var emoji reactionMessage
@@ -133,7 +133,7 @@ func websocketHandler(c *gin.Context) {
 			if err != nil {
 				fmt.Println(err)
 			}
-			sendAll(string(js), context)
+			sendAll(js, context)
 			continue
 		default:
 			fmt.Println("Message type not an option")
@@ -152,9 +152,9 @@ func removeFromSlice(clients []*websocket.Conn, conn *websocket.Conn) []*websock
 	return clients
 }
 
-func sendAll(json string, context context.Context) {
+func sendAll(json []byte, context context.Context) {
 	for i := 0; i < len(Clients); i++ {
-		err := wsjson.Write(context, Clients[i], json)
+		err := Clients[i].Write(context, websocket.MessageText, json)
 		if err != nil {
 			fmt.Println(err)
 		}
