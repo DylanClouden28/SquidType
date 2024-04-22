@@ -16,7 +16,7 @@ import (
 )
 
 func Route(router *gin.Engine) {
-	auth := router.Group("/auth")
+	auth := router.Group("/api/auth")
 	{
 		auth.POST("/login", login)
 		auth.POST("/register", register)
