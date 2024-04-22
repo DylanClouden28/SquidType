@@ -68,7 +68,7 @@ function App() {
 
   const tryRegister = async () => {
     try{
-      const response = await fetch("baseUrl + /auth/register", {
+      const response = await fetch(baseUrl + "/auth/register", {
         method: "POST",
         body: JSON.stringify({
           username: signUpForm.username,
