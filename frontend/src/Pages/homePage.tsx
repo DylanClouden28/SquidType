@@ -116,16 +116,21 @@ function home(){
       }[readyState];
 
     const addNewChatMessage = (message: ChatMessage) => {
-        if( messages === undefined){
-            setMessages([message])
-            return
-        }
-        setMessages([...messages, message])
+        setMessages(prevMessages => {
+            console.log("messages", messages)
+            if(prevMessages === undefined){
+                console.log("no messages")
+                return[message]
+            }
+            return[...prevMessages, message]
+        })
         messageScroll(message.uuid)
     }
 
     const addNewReaction = (reaction: Reaction) => {
+        console.log("trying to add reaction")
         const currentMessages = messages;
+        console.log("emoji messages", messages)
         if (currentMessages === undefined){
             return
         }
@@ -148,7 +153,7 @@ function home(){
         try {
             const resultJson = JSON.parse(message);
             console.log("Recieved json over websocket:", resultJson)
-            if (resultJson.messageType !== undefined){
+            if (resultJson.messageType === undefined){
                 console.log("MessageType was no defined in websocket data");
                 return
             }
@@ -157,13 +162,13 @@ function home(){
             if (messageType == "chatMessage"){
                 const chatMess: chatWSMessage = resultJson;
                 console.log("Recvied chatMessage", chatMess)
-                addNewChatMessage(chatMess.Data.message)
+                addNewChatMessage(chatMess.data.message)
             }
 
             if (messageType == "reactionMessage"){
                 const reactionMess: reactionWSMessage = resultJson;
                 console.log("Receieved reaction message")
-                addNewReaction(reactionMess.Data.reaction)
+                addNewReaction(reactionMess.data.reaction)
             }
 
             // if (messageType == "roundStart"){
@@ -279,7 +284,7 @@ function home(){
 
           const lastMessage = body[body.length - 1]
           messageScroll(lastMessage.uuid)
-          
+          console.log("The current messages are after fetching", messages)
         } catch (error){
             console.log(error)
         }
@@ -330,7 +335,6 @@ function home(){
         }
     }
 
-
     const handleEmojiSelect = (emojiObj: any, event: any) => {
         setEmoji(emojiObj)
         console.log(emojiObj.emoji)
@@ -356,6 +360,8 @@ function home(){
         }
         return LiterallyHim;
     }
+
+    console.log("PAGE REFRESHING")
 
     return(
         <div className="p-4 bg-base-300 min-h-screen" data-theme="night">
@@ -404,7 +410,7 @@ function home(){
                                 <div className={username === message?.user ? "chat chat-end" : "chat chat-start"}>
                                     <div className="chat-image avatar">
                                         <div className="w-10 rounded-full">
-                                        <img alt="Tailwind CSS chat bubble component" src={username === message?.user ? getImageSrc(): `${baseUrl}/public/images/${message?.user}.png`} />
+                                        <img  src={username === message?.user ? getImageSrc(): `${baseUrl}/public/images/${message?.user}.png`} alt="no pfp" />
                                         </div>
                                     </div>
                                     <div className={username === message?.user ? "chat-header mr-2" : "chat-header ml-2"}>

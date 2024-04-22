@@ -18,13 +18,13 @@ export interface baseWSMessage{
 }
 
 export interface chatWSMessage extends baseWSMessage{
-    Data: {
+    data: {
         message: ChatMessage;
     }
 }
 
 export interface reactionWSMessage extends baseWSMessage{
-    Data: {
+    data: {
         reaction: Reaction;
     }
 }
