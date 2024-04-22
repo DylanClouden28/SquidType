@@ -135,7 +135,7 @@ func websocketHandler(c *gin.Context) {
 			emoji.Data.Reaction.Username = username
 			messages.SendEmoji(emoji.Data.Reaction)
 			emoji.MessageType = "reactionMessage"
-			js, err := json.Marshal(emoji.Data)
+			js, err := json.Marshal(emoji)
 			if err != nil {
 				fmt.Println(err)
 			}
