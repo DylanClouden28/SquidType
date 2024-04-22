@@ -38,6 +38,6 @@ func main() {
 	controller.Route(r)
 	messages.Route(r)
 	game.Route(r)
-	r.Static("/public/images", "./public/images")
+	r.Static("/api/public/images", "./public/images")
 	r.Run(":8000")
 }
