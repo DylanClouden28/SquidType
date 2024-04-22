@@ -39,5 +39,6 @@ func main() {
 	messages.Route(r)
 	game.Route(r)
 	r.Static("/public/images", "./public/images")
+	go game.GameLoop()
 	r.Run(":8000")
 }

@@ -1,10 +1,13 @@
 package game
 
 import (
-	"math/rand"
+	"log"
 	"strings"
 	"sync"
 	"time"
+
+	"nhooyr.io/websocket"
+	"nhooyr.io/websocket/wsjson"
 )
 
 type player struct {
@@ -63,6 +66,13 @@ func incomingMessage(mess message, username string) gameUpdate {
 	return gameUpdate{}
 }
 
+func sendMessage(strMessage string) {
+	// sends strMessage string to all connected users
+	for i := 0; i < len(Clients); i++ {
+		wsjson.Write(BackgroundContext, Clients[i], strMessage)
+	}
+}
+
 func GameLoop() {
 	// primary game loop
 	// will always be running
@@ -75,6 +85,7 @@ func GameLoop() {
 		for len(*GameState.Players) == 0 {
 			GameState.Cond.Wait()
 		}
+		log.Printf("game starting")
 		for i := 0; i < len(*GameState.Players); i++ {
 			(*GameState.Players)[i].IsDead = false
 			(*GameState.Players)[i].CurrentPercentage = 0.0

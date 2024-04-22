@@ -1,6 +1,7 @@
 package game
 
 import (
+	"context"
 	"fmt"
 	"sluggers/controller"
 
@@ -10,6 +11,7 @@ import (
 )
 
 var Clients = make([]*websocket.Conn, 0)
+var BackgroundContext = context.Background()
 
 type message struct {
 	MessageType string `json:"messageType"`
