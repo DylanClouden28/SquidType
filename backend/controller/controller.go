@@ -13,6 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"golang.org/x/crypto/bcrypt"
+	"io"
 	"os"
 )
 
@@ -163,10 +164,13 @@ func register(c *gin.Context) {
 		c.JSON(400, "Error creating user")
 		return
 	}
-	err = os.Link("./controller/squid1.jpg", "./public/images/"+newUser.Username+".png")
-	if err != nil {
-		fmt.Println(err)
-	}
+	srcImage := "./controller/squid1.jpg"
+	dstImage := "./public/images/" + newUser.Username + ".png"
+	srcFile, _ := os.Open(srcImage)
+	defer srcFile.Close()
+	dstFile, _ := os.Create(dstImage)
+	defer dstFile.Close()
+	io.Copy(dstFile, srcFile)
 	c.JSON(200, "success")
 }
 
