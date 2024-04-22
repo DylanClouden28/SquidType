@@ -79,7 +79,7 @@ function home(){
     const [messages, setMessages] = useState<ChatMessage[]>()
     const [isHelp, setIsHelp] = useState(true);
     const [username, setUsername] = useState("");
-    const [currentMessage, setCurrentMessage] = useState(null)
+    const [currentMessage, setCurrentMessage] = useState(undefined)
     const [messageInput, setMessageInput] = useState("")
     const [isEmojiDropDown, setEmojiDropDown] = useState(false);
     const [finalImage, setFinalImage] = useState("");
@@ -129,23 +129,24 @@ function home(){
 
     const addNewReaction = (reaction: Reaction) => {
         console.log("trying to add reaction")
-        const currentMessages = messages;
         console.log("emoji messages", messages)
-        if (currentMessages === undefined){
-            return
-        }
-        const messageToChange = currentMessages.find(message => {
-            return message.uuid === reaction.message_id
-        })
+        setMessages(prevMessages => {
+            if (prevMessages === undefined){
+                return
+            }
+            const updatedMessages = prevMessages.map(message => {
+                if (message.uuid === reaction.message_id){
+                    const newMessage = {
+                        ...message,
+                        reaction: [...message.reaction, reaction]
+                    }
+                    return newMessage;
+                }
+                return message;
+            });
 
-        if (messageToChange === undefined){
-            console.log("Could not find message to add emoji too")
-            return
-        }
-
-        messageToChange.reactions.push(reaction); 
-
-        setMessages(currentMessages);
+            return updatedMessages
+        });
     }
     
     const handleNewMessage = (message: string) => {
@@ -320,7 +321,7 @@ function home(){
                 return
             }
             const reactionData = JSON.stringify({
-                "messageType": "chatMessage",
+                "messageType": "reactionMessage",
                 "Data": {
                     "reaction": {
                         emoji: emoji,
@@ -419,6 +420,7 @@ function home(){
                                     </div>
                                     <div className="chat-bubble hover:bg-base-100" id={message.uuid} role="button" onClick={() => {
                                         setEmojiDropDown(!isEmojiDropDown);
+                                        console.log("setting emoji to message uuid of ", message.uuid)
                                         setCurrentMessage(message?.uuid);
                                         }}>
                                             <div className='tooltip' data-tip="Click to add Emoji">

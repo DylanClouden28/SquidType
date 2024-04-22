@@ -8,7 +8,7 @@ export interface ChatMessage{
     user: string;
     content: string;
     date: Date;
-    reactions: Reaction[];
+    reaction: Reaction[];
     uuid: string;
 }
 
