@@ -16,7 +16,7 @@ import (
 )
 
 func Route(router *gin.Engine) {
-	message := router.Group("/message")
+	message := router.Group("/api/message")
 	{
 		message.GET("/get-messages", getMessages)
 	}

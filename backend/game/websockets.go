@@ -42,7 +42,7 @@ type reactionMessage struct {
 }
 
 func Route(router *gin.Engine) {
-	game := router.Group("/ws")
+	game := router.Group("/api/ws")
 	{
 		game.GET("/", websocketHandler)
 	}
