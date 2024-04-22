@@ -113,7 +113,12 @@ func websocketHandler(c *gin.Context) {
 				continue
 			}
 			newMessage := messages.SendMessage(username, chatMess.Data.Message.Content)
-			js, err := json.Marshal(newMessage)
+			chatMess.Data.Message.ID = newMessage.ID
+			chatMess.Data.Message.Date = newMessage.Date
+			chatMess.Data.Message.Reaction = newMessage.Reaction
+			chatMess.Data.Message.User = newMessage.User
+			chatMess.MessageType = "chatMessage"
+			js, err := json.Marshal(chatMess)
 			if err != nil {
 				fmt.Println(err)
 				continue
@@ -129,6 +134,7 @@ func websocketHandler(c *gin.Context) {
 			}
 			emoji.Data.Reaction.Username = username
 			messages.SendEmoji(emoji.Data.Reaction)
+			emoji.MessageType = "reactionMessage"
 			js, err := json.Marshal(emoji.Data)
 			if err != nil {
 				fmt.Println(err)
