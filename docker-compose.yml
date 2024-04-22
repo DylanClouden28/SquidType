@@ -12,3 +12,8 @@ services:
     build: ./frontend
     ports:
       - "8080:4173"
+  nginx:
+    build: ./nginx/
+    ports:
+      - "443:443"
+      - "80:80"
