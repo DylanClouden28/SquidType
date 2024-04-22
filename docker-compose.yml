@@ -2,8 +2,8 @@ version: '3'
 services:
   mongo:
     image: mongo:4.2.5
-      #ports:
-      #   - "27017:27017"
+      ports:
+        - "27017:27017"
   go:
     build: ./backend/
     ports:
