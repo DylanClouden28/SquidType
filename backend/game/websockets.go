@@ -7,10 +7,11 @@ import (
 	"sluggers/models"
 
 	"context"
+	"sluggers/messages"
+
 	"github.com/gin-gonic/gin"
 	"nhooyr.io/websocket"
 	"nhooyr.io/websocket/wsjson"
-	"sluggers/messages"
 )
 
 var Clients = make([]*websocket.Conn, 0)
@@ -50,14 +51,22 @@ func Route(router *gin.Engine) {
 
 func websocketHandler(c *gin.Context) {
 	context := c.Request.Context()
+	host := c.Request.Header.Get("Host")
+	c.Request.Header.Set("Origin", host)
+
+	fmt.Println("Trying to connect to websocket")
+	fmt.Println("\n\n", "Recieved request: ", c.Request, "\n\n")
 	isLoggedIn, username := controller.Auth(c)
 	if !isLoggedIn {
 		c.JSON(400, "user not logged in")
+		fmt.Println("User tryed to connect to websocket was not logged in")
 		return
 	}
+
 	conn, err := websocket.Accept(c.Writer, c.Request, nil)
 	if err != nil {
 		c.JSON(500, "error starting websocket")
+		fmt.Println("error with accept handshake Error: ", err)
 		return
 	}
 	Clients = append(Clients, conn)

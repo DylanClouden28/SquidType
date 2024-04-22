@@ -12,6 +12,7 @@ import Modal from '../components/Modal'
 import '../App.css'
 
 import {GameState, Player} from '../interfaces/game'
+import { baseWSMessage, ChatMessage, chatWSMessage, Reaction, reactionWSMessage } from '../interfaces/websockets';
 
 const CONNECTION_STATUS_CONNECTING: number = 0;
 const CONNECTION_STATUS_OPEN: number =  1;
@@ -73,7 +74,7 @@ const mockPlayers: Player[] = [
 
 function home(){
     const [emoji, setEmoji] = useState(null)
-    const [messages, setMessages] = useState([])
+    const [messages, setMessages] = useState<ChatMessage[]>()
     const [isHelp, setIsHelp] = useState(true);
     const [username, setUsername] = useState("");
     const [currentMessage, setCurrentMessage] = useState(null)
@@ -103,7 +104,7 @@ function home(){
     }),[]);
     
 
-    const {sendMessage, lastMessage, readyState} = useWebSocket('wss://echo.websocket.org', options);
+    const {sendMessage, lastMessage, readyState} = useWebSocket('ws://localhost:8000/ws/', options);
     
     const connectionStatus = {
         [CONNECTION_STATUS_CONNECTING]: 'Connecting',
@@ -111,6 +112,34 @@ function home(){
         [CONNECTION_STATUS_CLOSING]: 'Closing',
         [CONNECTION_STATUS_CLOSED]: 'Closed',
       }[readyState];
+
+    const addNewChatMessage = (message: ChatMessage) => {
+        if( messages === undefined){
+            setMessages([message])
+            return
+        }
+        setMessages([...messages, message])
+        messageScroll(message.uuid)
+    }
+
+    const addNewReaction = (reaction: Reaction) => {
+        const currentMessages = messages;
+        if (currentMessages === undefined){
+            return
+        }
+        const messageToChange = currentMessages.find(message => {
+            return message.uuid === reaction.message_id
+        })
+
+        if (messageToChange === undefined){
+            console.log("Could not find message to add emoji too")
+            return
+        }
+
+        messageToChange.reactions.push(reaction); 
+
+        setMessages(currentMessages);
+    }
     
     const handleNewMessage = (message: string) => {
         
@@ -123,22 +152,35 @@ function home(){
             }
             const messageType = resultJson.messageType;
 
-            if (messageType == "roundStart"){
-                console.log("Recvied roundStart")
+            if (messageType == "chatMessage"){
+                const chatMess: chatWSMessage = resultJson;
+                console.log("Recvied chatMessage", chatMess)
+                addNewChatMessage(chatMess.Data.message)
             }
 
-            if (messageType == "gameUpdate"){
-                console.log("Recevied gameUpdate")
-                const newGameState: GameState = {
-                    Players: resultJson?.Players,
-                    currentRound: resultJson?.currentRound,
-                    currentLight: resultJson?.currentLight,
-                    TargetParagraph: resultJson?.TargetMessage,
-                    currentParagraph: gameState.currentParagraph,
-                    currentState: resultJson?.currentState,
-                }
-                setGameState(newGameState)
+            if (messageType == "reactionMessage"){
+                const reactionMess: reactionWSMessage = resultJson;
+                console.log("Receieved reaction message")
+                addNewReaction(reactionMess.Data.reaction)
             }
+
+            // if (messageType == "roundStart"){
+            //     console.log("Recvied roundStart")
+            // }
+
+            // if (messageType == "gameUpdate"){
+            //     console.log("Recevied gameUpdate")
+            //     const newGameState: GameState = {
+            //         Players: resultJson?.Players,
+            //         currentRound: resultJson?.currentRound,
+            //         currentLight: resultJson?.currentLight,
+            //         TargetParagraph: resultJson?.TargetMessage,
+            //         currentParagraph: gameState.currentParagraph,
+            //         currentState: resultJson?.currentState,
+            //         countDown: resultJson?.countDown,
+            //     }
+            //     setGameState(newGameState)
+            // }
         }
         catch (error){
             console.log("Error handling new websocket message", error)
@@ -246,22 +288,15 @@ function home(){
             if (message == ''){
                 return
             }
-            const response = await fetch("http://localhost:8000/message/send-message", {
-              method: "POST",
-              mode: 'cors',
-              body: JSON.stringify({
-                content: message
-              }),
-              credentials: "include"
+            const messData = JSON.stringify({
+                "messageType": "chatMessage",
+                "Data": {
+                    "message": {
+                        "content": message
+                    }
+                }
             })
-            if (!response.ok){
-              const {err} = await response.json()
-              console.log(err)
-            }
-
-            setMessageInput('')
-  
-            await getMessages();
+            sendMessage(messData);
             
         } catch (error){
             console.log(error)
@@ -276,22 +311,16 @@ function home(){
             if(currentMessage === null){
                 return
             }
-            const response = await fetch("http://localhost:8000/message/send-emoji", {
-              method: "POST",
-              mode: 'cors',
-              body: JSON.stringify({
-                emoji: emoji,
-                username: username,
-                message_id: currentMessage
-              }),
-              credentials: "include"
+            const reactionData = JSON.stringify({
+                "messageType": "chatMessage",
+                "Data": {
+                    "reaction": {
+                        emoji: emoji,
+                        message_id: currentMessage
+                    }
+                }
             })
-            if (!response.ok){
-              const {err} = await response.json()
-              console.log(err)
-            }
-  
-            await getMessages();
+            sendMessage(reactionData);
             
         } catch (error){
             console.log(error)
@@ -368,7 +397,7 @@ function home(){
 
                     <div className="card w-5/6 shadow-2xl bg-base-200 p-4">
                         <div className={isHelp ? "chatBox p-2 h-[20rem] 2xl:h-[32rem] overflow-auto overflow-x-hidden" : "chatBox p-2 h-[25rem] lg:h-[28rem] 2xl:h-[38rem] overflow-auto overflow-x-hidden"}>
-                                { messages.length > 0 && messages.map(message =>
+                                { messages && messages.length > 0 && messages.map(message =>
                                 <div className={username === message?.user ? "chat chat-end" : "chat chat-start"}>
                                     <div className="chat-image avatar">
                                         <div className="w-10 rounded-full">
