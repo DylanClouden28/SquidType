@@ -115,9 +115,6 @@ func websocketHandler(c *gin.Context) {
 			if len(chatMess.Data.Message.Content) > 100 {
 				continue
 			}
-			if len(chatMess.Data.Message.Content) > 100 {
-				continue
-			}
 			newMessage := messages.SendMessage(username, chatMess.Data.Message.Content)
 			chatMess.Data.Message.ID = newMessage.ID
 			chatMess.Data.Message.Date = newMessage.Date

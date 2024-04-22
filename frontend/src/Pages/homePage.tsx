@@ -445,7 +445,7 @@ function home(){
                                     {message?.user}
                                     <time className="text-xs opacity-50 mx-1">{new Date(message?.date)?.toLocaleString("en-US", {hour: "2-digit", minute: "2-digit"})}</time>
                                     </div>
-                                    <div className="chat-bubble hover:bg-base-100" id={message.uuid} role="button" onClick={() => {
+                                    <div className="chat-bubble hover:bg-base-100 max-w-96 text-clip overflow-hidden" id={message.uuid} role="button" onClick={() => {
                                         setEmojiDropDown(!isEmojiDropDown);
                                         console.log("setting emoji to message uuid of ", message.uuid)
                                         setCurrentMessage(message?.uuid);
