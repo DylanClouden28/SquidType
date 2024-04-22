@@ -165,7 +165,7 @@ const GameView: React.FC<gameViewProps> = ({gameState, setGameState, username}) 
                 <span className="text-2xl font-bold italic text-accent">WPM: <span className="not-italic text-neutral-content">{myWPM}</span></span>
             </div>
             <div className="p-4">
-                <p>
+                <p className="select-none">
                 {comparisonText()}
                 </p>
             </div>

@@ -85,6 +85,7 @@ function home(){
     const [finalImage, setFinalImage] = useState("");
     const [cropData, setCropData] = useState("");
     const [lastMess, setLastMess] = useState<ChatMessage | undefined>(undefined);
+    const [textLengthError, setTextLengthError] = useState(false);
 
     const [gameState, setGameState] = useState<GameState>({
         Players: mockPlayers,
@@ -305,7 +306,12 @@ function home(){
 
     const sendTextMessage = async (message: string) => {
         try{
+            setTextLengthError(false);
             if (message == ''){
+                return
+            }
+            if (message.length > 100){
+                setTextLengthError(true);
                 return
             }
             const messData = JSON.stringify({
@@ -450,14 +456,15 @@ function home(){
                                 )}
                         </div>
 
-                        <div className="card-body p-2">
+                        <div className={textLengthError ? "card-body p-2 tooltip tooltip-open tooltip-accent" : "card-body p-2"} data-tip="Too many character please enter under 100 characters" >
                             <div className="flex">
                                 <input onKeyDown={e => {
                                     if (e.key == "Enter"){
                                         sendTextMessage(messageInput)
                                     }
                                 }} 
-                                className="input max-sm:input-sm input-bordered flex-grow mx-2" placeholder="Type here" value={messageInput} type="text" onChange={e => {setMessageInput(e.target.value)}}/>
+                                className="input max-sm:input-sm input-bordered flex-grow mx-2 "
+                                placeholder="Type here" value={messageInput} type="text" onChange={e => {setMessageInput(e.target.value)}}/>
                                 <img onClick={() => {sendTextMessage(messageInput)}} className="btn max-sm:btn-sm btn-accent p-2" src={sendIcon}></img>
                             </div>
                         </div>
