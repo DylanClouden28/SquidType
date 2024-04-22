@@ -3,7 +3,6 @@ package messages
 import (
 	"context"
 	"fmt"
-	"sluggers/controller"
 	"sluggers/database"
 	"sluggers/models"
 	"time"
@@ -20,8 +19,6 @@ func Route(router *gin.Engine) {
 	message := router.Group("/message")
 	{
 		message.GET("/get-messages", getMessages)
-		message.POST("/send-message", sendMessage)
-		message.POST("/send-emoji", sendEmoji)
 	}
 }
 
@@ -48,45 +45,25 @@ func getMessages(c *gin.Context) {
 
 }
 
-func sendMessage(c *gin.Context) {
-	logged_in, user := controller.Auth(c)
+func SendMessage(username string, newMessage string) models.Message {
+	/*logged_in, user := controller.Auth(c)
 	if !logged_in {
 		c.JSON(403, "Not logged in")
 		return
-	}
+	}*/
 	var message models.Message
-	err := c.BindJSON(&message)
-	if err != nil {
-		c.JSON(500, "Cant read message")
-		return
-	}
+	message.Content = newMessage
 	message.Date = primitive.NewDateTimeFromTime(time.Now().UTC())
-	message.User = user
+	message.User = username
 	messages := database.Collection("messages")
 	message.ID = uuid.New().String()
 	message.Reaction = make([]models.Reaction, 0)
 	messages.InsertOne(context.TODO(), message)
-	c.JSON(200, "message received")
-
+	return message
 }
 
-func sendEmoji(c *gin.Context) {
-	logged_in, user := controller.Auth(c)
-	if !logged_in {
-		c.JSON(403, "Not logged in")
-		return
-	}
-	var emoji models.Reaction
-	err := c.BindJSON(&emoji)
-	fmt.Println(emoji)
-	if err != nil {
-		c.JSON(500, "Cant read emoji")
-		return
-	}
-	fmt.Println("Emoji input", emoji)
-	emoji.Username = user
-	message_id := emoji.MessageId
-	filter := bson.D{{"uuid", message_id}}
+func SendEmoji(reaction models.Reaction) {
+	filter := bson.D{{"uuid", reaction.MessageId}}
 	/*var message models.Message
 		messages := database.Collection("messages")
 		mess_err := messages.FindOne(context.TODO(), filter).Decode(&message)
@@ -97,12 +74,9 @@ func sendEmoji(c *gin.Context) {
 	  message.Reaction = append(message.Reaction, emoji)*/
 	messages := database.Collection("messages")
 
-	update := bson.D{{"$push", bson.D{{"reaction", emoji}}}}
+	update := bson.D{{"$push", bson.D{{"reaction", reaction}}}}
 	result, update_err := messages.UpdateOne(context.TODO(), filter, update)
-	fmt.Println(result)
 	if update_err != nil {
-		c.JSON(400, "Error adding emoji")
-		return
+		fmt.Println("error adding emoji", result, update_err)
 	}
-	c.JSON(200, "success")
 }

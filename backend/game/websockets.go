@@ -6,9 +6,11 @@ import (
 	"sluggers/controller"
 	"sluggers/models"
 
+	"context"
 	"github.com/gin-gonic/gin"
 	"nhooyr.io/websocket"
 	"nhooyr.io/websocket/wsjson"
+	"sluggers/messages"
 )
 
 var Clients = make([]*websocket.Conn, 0)
@@ -32,6 +34,13 @@ type chatMessage struct {
 	} `json:"data"`
 }
 
+type reactionMessage struct {
+	MessageType string `json:"messageType"`
+	Data        struct {
+		Reaction models.Reaction `json:"reaction"`
+	} `json:"data"`
+}
+
 func Route(router *gin.Engine) {
 	game := router.Group("/ws")
 	{
@@ -41,7 +50,7 @@ func Route(router *gin.Engine) {
 
 func websocketHandler(c *gin.Context) {
 	context := c.Request.Context()
-	isLoggedIn, _ := controller.Auth(c)
+	isLoggedIn, username := controller.Auth(c)
 	if !isLoggedIn {
 		c.JSON(400, "user not logged in")
 		return
@@ -88,20 +97,34 @@ func websocketHandler(c *gin.Context) {
 			}{Text: "hello how is it going"}})
 			continue
 		case "chatMessage":
-			fmt.Println("Recieved chat-message")
 			var chatMess chatMessage
 			err = json.Unmarshal(rawMess, &chatMess)
 			if err != nil {
 				fmt.Println("Error Unmarshiling Error: ", err)
 				continue
 			}
-
-			println("recieved chat Message from ", string(chatMess.Data.Message.User))
-			//Handle new chatMessage here
-
-			wsjson.Write(context, conn, testMessage{MessageType: "yoyo", Data: struct {
-				Text string "json:\"text\""
-			}{Text: "I got your chat Message"}})
+			newMessage := messages.SendMessage(username, chatMess.Data.Message.Content)
+			js, err := json.Marshal(newMessage)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			sendAll(string(js), context)
+			continue
+		case "reactionMessage":
+			var emoji reactionMessage
+			err = json.Unmarshal(rawMess, &emoji)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			emoji.Data.Reaction.Username = username
+			messages.SendEmoji(emoji.Data.Reaction)
+			js, err := json.Marshal(emoji.Data)
+			if err != nil {
+				fmt.Println(err)
+			}
+			sendAll(string(js), context)
 			continue
 		default:
 			fmt.Println("Message type not an option")
@@ -118,4 +141,13 @@ func removeFromSlice(clients []*websocket.Conn, conn *websocket.Conn) []*websock
 		}
 	}
 	return clients
+}
+
+func sendAll(json string, context context.Context) {
+	for i := 0; i < len(Clients); i++ {
+		err := wsjson.Write(context, Clients[i], json)
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
 }
