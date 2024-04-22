@@ -299,6 +299,7 @@ function home(){
                 }
             })
             sendMessage(messData);
+            setMessageInput('')
             
         } catch (error){
             console.log(error)
