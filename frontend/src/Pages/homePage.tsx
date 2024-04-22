@@ -84,6 +84,7 @@ function home(){
     const [isEmojiDropDown, setEmojiDropDown] = useState(false);
     const [finalImage, setFinalImage] = useState("");
     const [cropData, setCropData] = useState("");
+    const [lastMess, setLastMess] = useState<ChatMessage | undefined>(undefined);
 
     const [gameState, setGameState] = useState<GameState>({
         Players: mockPlayers,
@@ -122,9 +123,11 @@ function home(){
                 console.log("no messages")
                 return[message]
             }
+            console.log("Add new messages")
             return[...prevMessages, message]
         })
-        messageScroll(message.uuid)
+        console.log("New message has been added")
+        setLastMess(message);
     }
 
     const addNewReaction = (reaction: Reaction) => {
@@ -218,6 +221,15 @@ function home(){
             setInterval(() => {getMessages();}, 1000);
         }
     }, [])
+
+    useEffect(() => {
+        if (lastMess === undefined){
+            return
+        }
+        if (lastMess !== undefined){
+            messageScroll(lastMess.uuid)
+        }
+    }, [lastMess])
 
     // const openModal = () => {
     //     setIsModalOpen(true);
@@ -440,7 +452,12 @@ function home(){
 
                         <div className="card-body p-2">
                             <div className="flex">
-                                <input className="input max-sm:input-sm input-bordered flex-grow mx-2" placeholder="Type here" value={messageInput} type="text" onChange={e => {setMessageInput(e.target.value)}}/>
+                                <input onKeyDown={e => {
+                                    if (e.key == "Enter"){
+                                        sendTextMessage(messageInput)
+                                    }
+                                }} 
+                                className="input max-sm:input-sm input-bordered flex-grow mx-2" placeholder="Type here" value={messageInput} type="text" onChange={e => {setMessageInput(e.target.value)}}/>
                                 <img onClick={() => {sendTextMessage(messageInput)}} className="btn max-sm:btn-sm btn-accent p-2" src={sendIcon}></img>
                             </div>
                         </div>
