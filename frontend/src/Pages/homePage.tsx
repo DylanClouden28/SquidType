@@ -85,7 +85,8 @@ function home(){
     const [finalImage, setFinalImage] = useState("");
     const [cropData, setCropData] = useState("");
     const [lastMess, setLastMess] = useState<ChatMessage | undefined>(undefined);
-    const [textLengthError, setTextLengthError] = useState(false);
+    const [textError, setTextError] = useState<undefined | string>(undefined);
+    const [textTimeout, setTextTimeout] = useState(false);
 
     const [gameState, setGameState] = useState<GameState>({
         Players: mockPlayers,
@@ -306,12 +307,16 @@ function home(){
 
     const sendTextMessage = async (message: string) => {
         try{
-            setTextLengthError(false);
             if (message == ''){
                 return
             }
+            setTextError(undefined);
+            if (textTimeout === true){
+                setTextError("Please wait a second before sending a message");
+                return 
+            }
             if (message.length > 100){
-                setTextLengthError(true);
+                setTextError("Please send a message under 100 characters");
                 return
             }
             const messData = JSON.stringify({
@@ -324,6 +329,10 @@ function home(){
             })
             sendMessage(messData);
             setMessageInput('')
+            setTextTimeout(true);
+            setTimeout(() => {
+                setTextTimeout(false);
+            }, 3000);
             
         } catch (error){
             console.log(error)
@@ -456,7 +465,7 @@ function home(){
                                 )}
                         </div>
 
-                        <div className={textLengthError ? "card-body p-2 tooltip tooltip-open tooltip-accent" : "card-body p-2"} data-tip="Too many character please enter under 100 characters" >
+                        <div className={textError ? "card-body p-2 tooltip tooltip-open tooltip-accent" : "card-body p-2"} data-tip={textError} >
                             <div className="flex">
                                 <input onKeyDown={e => {
                                     if (e.key == "Enter"){
