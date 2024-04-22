@@ -9,6 +9,7 @@ interface standingsViewProps {
 
 const StandingsView: React.FC<standingsViewProps> = ({gameState, setGameState, username}) => {
 
+    const baseUrl: string = import.meta.env.VITE_Backend_URL
 
     let playersleft = 0;
     const playersLeftCounter = gameState.Players.forEach((player) => {
@@ -54,7 +55,7 @@ const StandingsView: React.FC<standingsViewProps> = ({gameState, setGameState, u
                                 {index + 1}
                                 <div className="avatar flex flex-col h-16 w-16 p-1">
                                     <div className={Player.IsDead ? "rounded-full ring ring-error": "rounded-full ring ring-success"}>
-                                        <img src={`http://localhost:8000/public/images/${Player.Username}.png`} alt="no profile" />
+                                        <img src={`$${baseUrl}/public/images/${Player.Username}.png`} alt="no profile" />
                                     </div>
                                 </div>
                             </th>

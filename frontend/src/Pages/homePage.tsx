@@ -73,6 +73,8 @@ const mockPlayers: Player[] = [
 ]
 
 function home(){
+    const baseUrl: string = import.meta.env.VITE_Backend_URL
+    const baseWSUrl: string = import.meta.env.VITE_Backend_URL_WS
     const [emoji, setEmoji] = useState(null)
     const [messages, setMessages] = useState<ChatMessage[]>()
     const [isHelp, setIsHelp] = useState(true);
@@ -104,7 +106,7 @@ function home(){
     }),[]);
     
 
-    const {sendMessage, lastMessage, readyState} = useWebSocket('ws://localhost:8000/ws/', options);
+    const {sendMessage, lastMessage, readyState} = useWebSocket(baseWSUrl + '/ws/', options);
     
     const connectionStatus = {
         [CONNECTION_STATUS_CONNECTING]: 'Connecting',
@@ -221,7 +223,7 @@ function home(){
 
     const getUser = async () => {
         try{
-            const response = await fetch("http://localhost:8000/auth/get-user", {
+            const response = await fetch(baseUrl + "/auth/get-user", {
               method: "POST",
               mode: 'cors',
               credentials: "include"
@@ -243,7 +245,7 @@ function home(){
 
     const signOut = async () => {
         try{
-            const response = await fetch("http://localhost:8000/auth/signout", {
+            const response = await fetch(baseUrl + "/auth/signout", {
               method: "POST",
               mode: 'cors',
               credentials: "include"
@@ -262,7 +264,7 @@ function home(){
 
     const getMessages = async () => {
         try{
-          const response = await fetch("http://localhost:8000/message/get-messages", {
+          const response = await fetch(baseUrl + "/message/get-messages", {
             method: "GET",
             mode: 'cors'
           })
@@ -349,7 +351,7 @@ function home(){
             return finalImage;
         }
         if (username){
-            return `http://localhost:8000/public/images/${username}.png`;
+            return `${baseUrl}/public/images/${username}.png`;
         }
         return LiterallyHim;
     }
@@ -401,7 +403,7 @@ function home(){
                                 <div className={username === message?.user ? "chat chat-end" : "chat chat-start"}>
                                     <div className="chat-image avatar">
                                         <div className="w-10 rounded-full">
-                                        <img alt="Tailwind CSS chat bubble component" src={username === message?.user ? getImageSrc(): `http://localhost:8000/public/images/${message?.user}.png`} />
+                                        <img alt="Tailwind CSS chat bubble component" src={username === message?.user ? getImageSrc(): `${baseUrl}/public/images/${message?.user}.png`} />
                                         </div>
                                     </div>
                                     <div className={username === message?.user ? "chat-header mr-2" : "chat-header ml-2"}>

@@ -12,6 +12,7 @@ interface gameViewProps {
 
 
 const GameView: React.FC<gameViewProps> = ({gameState, setGameState, username}) => {
+    const baseUrl: string = import.meta.env.VITE_Backend_URL
     
     const mockUsers = ['User1', "Dylan", "Chris", "Steve", "Steve", "Steve", "Steve"]
 
@@ -139,7 +140,7 @@ const GameView: React.FC<gameViewProps> = ({gameState, setGameState, username}) 
                 <div id={`progess_${Player.Username}`} className="flex flex-row bg-base-100 p-2 card w-5/6">
                     <div className="avatar flex flex-col h-16 w-16">
                         <div className="rounded-full">
-                        <img src={`http://localhost:8000/public/images/${Player.Username}.png`} alt="no profile" />
+                        <img src={`${baseUrl}/public/images/${Player.Username}.png`} alt="no profile" />
                         </div>
                     </div>
                     <div className="flex flex-col text-xl justify-center items-center mx-2 w-full">

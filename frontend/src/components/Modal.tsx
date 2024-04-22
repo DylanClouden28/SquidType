@@ -32,26 +32,7 @@ const Modal: React.FC<ModalProps> = ({cropData, setCropData, setFinalImage, fina
 
     const handleFileUpload = async (e) => {
         const file = e.target.files[0];
-        //const formData = new FormData();
-        //formData.append('image', file);
-        //CropTool(file);
-    
-        // try {
-        //     const response = await fetch('http://localhost:8000/public/images/', {
-        //         method: 'POST',
-        //         body: formData,
-        //         headers: {
-        //             //headers
-        //         },
-        //     });
-        //     if (response.ok) {
-        //         console.log('Uploaded successfully!');
-        //     } else {
-        //         console.error('Failed to upload: ', response.statusText);
-        //     }
-        // } catch (error) {
-        //     console.error('Error uploading: ', error);
-        // }
+        
     };
 
     return(

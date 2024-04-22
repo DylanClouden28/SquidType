@@ -8,6 +8,8 @@ interface winnerViewProps {
 
 const WinnerView: React.FC<winnerViewProps> = ({gameState, setGameState, username}) => {
 
+    const baseUrl: string = import.meta.env.VITE_Backend_URL
+
     return (
         <div className="bg-base-300 card">
             <div className="card-body flex flex-row gap-10 justify-end items-end p-48">
@@ -15,7 +17,7 @@ const WinnerView: React.FC<winnerViewProps> = ({gameState, setGameState, usernam
                     <div className="card-body p-0 justify-top items-center gap-y-0">
                         <div className="avatar flex flex-col h-20 p-2 w-20 justify-center items-center mt-4">
                             <div className={"rounded-full ring ring-silver"}>
-                                <img src={`http://localhost:8000/public/images/${gameState.Players[1].Username}.png`} alt="no profile" />
+                                <img src={`${baseUrl}/public/images/${gameState.Players[1].Username}.png`} alt="no profile" />
                             </div>
                         </div>
                         <span className={gameState.Players[1].Username == username ? "text-bold text-lg": "text-bold text-xl text-secondary"}>{gameState.Players[1].Username}</span>
@@ -28,7 +30,7 @@ const WinnerView: React.FC<winnerViewProps> = ({gameState, setGameState, usernam
                     <div className="card-body p-0 justify-top items-center gap-y-0">
                         <div className="avatar flex flex-col h-20 w-20  justify-center items-center mt-4">
                             <div className={"rounded-full ring ring-gold"}>
-                                <img src={`http://localhost:8000/public/images/${gameState.Players[0].Username}.png`} alt="no profile" />
+                                <img src={`${baseUrl}/public/images/${gameState.Players[0].Username}.png`} alt="no profile" />
                             </div>
                         </div>
                         <span className={gameState.Players[0].Username == username ? "text-bold text-lg mt-2": "text-bold text-xl text-secondary mt-2"}>{gameState.Players[0].Username}</span>
@@ -41,7 +43,7 @@ const WinnerView: React.FC<winnerViewProps> = ({gameState, setGameState, usernam
                     <div className="card-body p-0 justify-top items-center gap-y-0">
                         <div className="avatar flex flex-col h-20 w-20 p-3 justify-center items-center mt-4 ">
                             <div className={"rounded-full ring ring-bronze"}>
-                                <img src={`http://localhost:8000/public/images/${gameState.Players[2].Username}.png`} alt="no profile" />
+                                <img src={`${baseUrl}/public/images/${gameState.Players[2].Username}.png`} alt="no profile" />
                             </div>
                         </div>
                         <span className={gameState.Players[2].Username == username ? "text-bold text-lg": "text-bold text-xl text-secondary"}>{gameState.Players[2].Username}</span>

@@ -15,7 +15,7 @@ interface CropProps{
 export const CropTool: React.FC<CropProps> = ({cropData, setCropData, finalImage, setFinalImage, image, setImage}) => {
   const [isSelected, setSelected]= useState(false);
   const cropperRef = useRef<ReactCropperElement>(null);
-  
+  const baseUrl: string = import.meta.env.VITE_Backend_URL
 
   const onChange = (e: any) => {
     e.preventDefault();
@@ -57,7 +57,7 @@ export const CropTool: React.FC<CropProps> = ({cropData, setCropData, finalImage
         formData.append('image', file);
     
         try {
-            const response = await fetch('http://localhost:8000/auth/upload', {
+            const response = await fetch(baseUrl + '/auth/upload', {
                 method: 'POST',
                 mode: 'cors',
                 body: formData,
@@ -76,29 +76,6 @@ export const CropTool: React.FC<CropProps> = ({cropData, setCropData, finalImage
         }
     }
   };
-
-//   const handleFileUpload = async (e) => {
-//     const file = e.target.files[0];
-//     const formData = new FormData();
-//     formData.append('image', file);
-
-//     try {
-//         const response = await fetch('http://localhost:8000/public/images/', {
-//             method: 'POST',
-//             body: formData,
-//             headers: {
-//                 //headers
-//             },
-//         });
-//         if (response.ok) {
-//             console.log('Uploaded successfully!');
-//         } else {
-//             console.error('Failed to upload: ', response.statusText);
-//         }
-//     } catch (error) {
-//         console.error('Error uploading: ', error);
-//     }
-// };
 
   return (
     <div>

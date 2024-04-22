@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import LiterallyHim from '../assets/LiterallyHim.jpg'
 import squidType from '../assets/squidType3.png'
 
-
 function App() {
+  const baseUrl: string = import.meta.env.VITE_Backend_URL
   const [loginForm, setLoginForm] = useState({
     username: '',
     password: '',
@@ -44,7 +44,7 @@ function App() {
 
   const tryLogin = async () => {
     try{
-      const response = await fetch("http://localhost:8000/auth/login", {
+      const response = await fetch(baseUrl + "/auth/login", {
         method: "POST",
         body: JSON.stringify({
           username: loginForm.username,
@@ -68,7 +68,7 @@ function App() {
 
   const tryRegister = async () => {
     try{
-      const response = await fetch("http://localhost:8000/auth/register", {
+      const response = await fetch("baseUrl + /auth/register", {
         method: "POST",
         body: JSON.stringify({
           username: signUpForm.username,

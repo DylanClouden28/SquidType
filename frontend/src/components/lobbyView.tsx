@@ -16,7 +16,7 @@ const LobbyView: React.FC<LobbyViewProps> = ({gameState, setGameState, username}
     
     const [ready, setReady] = useState(false)
     const [numReady, setNumReady]= useState(0)
-
+    const baseUrl: string = import.meta.env.VITE_Backend_URL
     const handleReadyClick = () => {
         setReady(!ready);
     }
@@ -51,7 +51,7 @@ const LobbyView: React.FC<LobbyViewProps> = ({gameState, setGameState, username}
                     <span className={Player.Username == username ? "text-bold text-lg": "text-bold italic text-xl text-secondary"}>{Player.Username}</span>
                     <div className="avatar flex flex-col h-32 w-32">
                         <div className={Player.isReady ? "rounded-full ring ring-success": "rounded-full ring ring-error"}>
-                            <img src={`http://localhost:8000/public/images/${Player.Username}.png`} alt="no profile" />
+                            <img src={`${baseUrl}/public/images/${Player.Username}.png`} alt="no profile" />
                         </div>
                     </div>
                     <span className={Player.isReady ? "text-bold text-success": "text-bold text-error"}>{Player.isReady ? "Ready": "Not Ready"}</span>
