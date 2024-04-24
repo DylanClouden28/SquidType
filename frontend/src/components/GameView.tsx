@@ -163,7 +163,7 @@ const GameView: React.FC<gameViewProps> = ({gameState, setGameState, username}) 
             {sortedPlayers.map((Player, index) => 
                 <div id={`progess_${Player.Username}`} className={index == 0 ? "flex flex-row bg-base-100 p-2 card m-0 tooltip tooltip-bottom col-span-3": "flex flex-row bg-base-100 p-2 card m-0 tooltip tooltip-bottom"} 
                 data-tip={
-                    gameState.TargetParagraph.slice(0, Number(Player.CurrentPercentage))
+                    gameState.TargetParagraph.slice(0, gameState.TargetParagraph.length * Number(Player.CurrentPercentage) / 100)
                     } >
                     <div className="avatar flex flex-col h-16 w-16">
                         <div className="rounded-full">
