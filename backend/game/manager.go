@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"strings"
 	"sync"
 	"time"
@@ -38,8 +39,6 @@ type gameState struct {
 	PreviousLightEnd time.Time
 	TargetMessage    string
 	currentState     int
-	DeathTarget      int
-	DeathAmount      int
 	Lock             sync.Mutex
 	Cond             *sync.Cond
 }
@@ -153,8 +152,19 @@ func gameUpdateSender() {
 func roundOverCheck() {
 	// Checks if the round is over
 	// call every time player dies
-	// if game is over, send message over isGameOver chan
+	// set isRoundOver to true if round should end
 	// TODO implement func
+}
+
+func isGameOver() bool {
+	// returns true if there is 1 player alive
+	// otherwise false
+	for i := 0; i < len(*GameState.Players); i++ {
+		if !(*GameState.Players)[i].IsDead {
+			return false
+		}
+	}
+	return true
 }
 
 func GameLoop() {
@@ -189,8 +199,38 @@ func GameLoop() {
 		// set new target message
 		// TODO generate target message in some way
 		// start := roundStart{MessageType: "roundStart", TargetMessage: GameState.TargetMessage}
+		//
+		for isGameOver() {
+			// runs as long as game is not over
+			for !*isRoundOver {
+				GameState.CurrentLight = Green
+				duration := time.Duration(rand.Intn(5)+5) * time.Second
+				GameState.CurrentLightEnds = time.Now().Add(time.Second * duration)
+				time.Sleep(duration)
+				GameState.CurrentLight = Yellow
+				duration = time.Duration(rand.Intn(4)+1) * time.Second
+				GameState.PreviousLightEnd = time.Now().Add(duration)
+				time.Sleep(duration)
+				GameState.CurrentLight = Red
+				duration = time.Duration(rand.Intn(4) + 1)
+			}
+			GameState.currentState = BetweenRound
+			sendCurrentState()
+			for i := 0; i < len(*GameState.Players); i++ {
+				(*GameState.Players)[i].CurrentPercentage = 0.0
+			}
+			time.Sleep(time.Second * 30)
+			GameState.currentState = Game
+			GameState.TargetMessage = "New Message Here"
+			sendCurrentState()
+			time.Sleep(time.Second * 3)
+			*isRoundOver = false
+		}
+		GameState.currentState = Winner
+		sendCurrentState()
+		// TODO send the ranking for the winner page
+		// TODO keep track of when players die for rankings
 
-		GameState.Lock.Unlock()
 	}
 
 }
