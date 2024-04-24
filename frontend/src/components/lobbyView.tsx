@@ -48,7 +48,7 @@ const LobbyView: React.FC<LobbyViewProps> = ({gameState, setGameState, username}
             <div className="grid grid-cols-6 gap-4">
                 {gameState.Players.map(Player =>
                     <div className="flex justify-center items-center p-4 flex-col">
-                    <span className={Player.Username == username ? "text-bold text-lg": "text-bold italic text-xl text-secondary"}>{Player.Username}</span>
+                    <span className={Player.Username == username ? "text-bold italic text-xl text-secondary": "text-bold text-lg"}>{Player.Username}</span>
                     <div className="avatar flex flex-col h-32 w-32">
                         <div className={Player.isReady ? "rounded-full ring ring-success": "rounded-full ring ring-error"}>
                             <img src={`${baseUrl}/public/images/${Player.Username}.png`} alt="no profile" />

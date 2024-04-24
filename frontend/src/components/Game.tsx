@@ -16,7 +16,7 @@ const Game: React.FC<GameProps> = ({gameState, setGameState, username}) =>{
 
     if (gameState.currentState === 'lobby'){
         return(
-            <div className="flex justify-center items-center">
+            <div className="flex justify-center items-center h-screen">
                 <LobbyView gameState={gameState} setGameState={setGameState} username={username}/>
             </div>
         )
@@ -30,7 +30,7 @@ const Game: React.FC<GameProps> = ({gameState, setGameState, username}) =>{
 
     if (gameState.currentState === 'betweenRound'){
         return(
-            <div className="flex justify-center items-center">
+            <div className="flex justify-center items-center h-screen">
                 <StandingsView gameState={gameState} setGameState={setGameState} username={username}/>
             </div>
         )
@@ -38,7 +38,7 @@ const Game: React.FC<GameProps> = ({gameState, setGameState, username}) =>{
 
     if (gameState.currentState === 'winner'){
         return(
-            <div className="flex justify-center items-center">
+            <div className="flex justify-center items-center h-screen">
                 <WinnerView gameState={gameState} setGameState={setGameState} username={username}/>
             </div>
         )

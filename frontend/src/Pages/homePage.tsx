@@ -22,54 +22,102 @@ const CONNECTION_STATUS_CLOSED: number  = 3;
 const enablePolling = false;
 
 const mockPlayers: Player[] = [
-    // {
-    //     Username: "Dylan",
-    //     IsDead: true,
-    //     CurrentPercentage: "90",
-    //     isReady: false,
-    //     WPM: 40,
-    //     lastRoundWPM: 50,
-    // },
-    // {
-    //     Username: "Steve",
-    //     IsDead: false,
-    //     CurrentPercentage: "40",
-    //     isReady: false,
-    //     WPM: 50,
-    //     lastRoundWPM: 70,
-    // },
-    // {
-    //     Username: "Steve",
-    //     IsDead: false,
-    //     CurrentPercentage: "50",
-    //     isReady: false,
-    //     WPM: 60,
-    //     lastRoundWPM: 50,
-    // },
-    // {
-    //     Username: "Steve",
-    //     IsDead: false,
-    //     CurrentPercentage: "30",
-    //     isReady: false,
-    //     WPM: 70,
-    //     lastRoundWPM: 30,
-    // },
-    // {
-    //     Username: "Steve",
-    //     IsDead: false,
-    //     CurrentPercentage: "30",
-    //     isReady: false,
-    //     WPM: 80,
-    //     lastRoundWPM: 20,
-    // },
-    // {
-    //     Username: "Steve",
-    //     IsDead: false,
-    //     CurrentPercentage: "30",
-    //     isReady: false,
-    //     WPM: 90,
-    //     lastRoundWPM: 10,
-    // },
+    {
+        Username: "Dylan",
+        IsDead: true,
+        CurrentPercentage: "90",
+        isReady: false,
+        WPM: 40,
+        lastRoundWPM: 50,
+    },
+    {
+        Username: "Joe",
+        IsDead: false,
+        CurrentPercentage: "70",
+        isReady: false,
+        WPM: 50,
+        lastRoundWPM: 70,
+    },
+    {
+        Username: "Steve",
+        IsDead: false,
+        CurrentPercentage: "56",
+        isReady: false,
+        WPM: 60,
+        lastRoundWPM: 50,
+    },
+    {
+        Username: "Steve",
+        IsDead: false,
+        CurrentPercentage: "34",
+        isReady: false,
+        WPM: 70,
+        lastRoundWPM: 30,
+    },
+    {
+        Username: "Steve",
+        IsDead: false,
+        CurrentPercentage: "33",
+        isReady: false,
+        WPM: 80,
+        lastRoundWPM: 20,
+    },
+    {
+        Username: "Bottom",
+        IsDead: false,
+        CurrentPercentage: "20",
+        isReady: false,
+        WPM: 90,
+        lastRoundWPM: 10,
+    },
+    {
+        Username: "Steve",
+        IsDead: false,
+        CurrentPercentage: "10",
+        isReady: false,
+        WPM: 70,
+        lastRoundWPM: 30,
+    },
+    {
+        Username: "Steve",
+        IsDead: false,
+        CurrentPercentage: "5",
+        isReady: false,
+        WPM: 80,
+        lastRoundWPM: 20,
+    },
+    {
+        Username: "Bottom",
+        IsDead: false,
+        CurrentPercentage: "67",
+        isReady: false,
+        WPM: 90,
+        lastRoundWPM: 10,
+    },
+    {
+        Username: "Steve",
+        IsDead: false,
+        CurrentPercentage: "7",
+        isReady: false,
+        WPM: 70,
+        lastRoundWPM: 30,
+    },
+    {
+        Username: "Steve",
+        IsDead: false,
+        CurrentPercentage: "80",
+        isReady: false,
+        WPM: 80,
+        lastRoundWPM: 20,
+    },
+    {
+        Username: "Bottom",
+        IsDead: false,
+        CurrentPercentage: "45",
+        isReady: false,
+        WPM: 90,
+        lastRoundWPM: 10,
+    },
 ]
 
 function home(){
@@ -392,34 +440,34 @@ function home(){
     console.log("PAGE REFRESHING")
 
     return(
-        <div className="p-4 bg-base-300 min-h-screen" data-theme="night">
-            <div className="navbar bg-base-100 rounded-box shadow-xl mb-10 p-4">
-            <div className="navbar-start">
+        <div className="bg-base-300 min-h-screen" data-theme="night">
+            <div className="w-48 fixed m-4">
                 {/* <p className='font-Consolas'><span className='text-error text-bold px-2 text-4xl '>SQUID </span><span className='text-bold text-4xl'> TYPE</span></p> */}
-                <img className='ml-4 w-32'src={Logo} alt="SquidType"></img>
+                <img className='ml-4 w-24'src={Logo} alt="SquidType"></img>
             </div>
-            <div className="navbar-end">
-                <h1 className='text-2xl px-4'>{username}</h1>
-                <div className="avatar">
-                    <div className="rounded-full mr-2 w-14 h-14">
-                    <img
-                        className="p-0"
-                        src={getImageSrc()}
-                    />
-                    </div>
-                </div>
-                <Modal cropData={cropData} setCropData={setCropData} setFinalImage={setFinalImage} finalImage={finalImage}/>
-                <button className='btn btn-neutral' onClick={signOut}>Signout</button>
-                {/* <button className='btn btn-neutral' onClick={openModal}>Open Modal</button> */}
-            </div>
-            </div>
-
             <div className='flex'>
                 <div className='w-2/3 h-fit'>
                     <Game gameState={gameState} setGameState={setGameState} username={username}/>
                 </div>
 
                 <div className="grid justify-items-center w-1/3 h-10">
+                    <div className="navbar bg-base-100 rounded-box shadow-xl mb-10 p-10 justify-end w-5/6 m-4">
+                        <div className="">
+                            <h1 className='text-2xl px-4'>{username}</h1>
+                            <div className="avatar">
+                                <div className="rounded-full mr-2 w-14 h-14">
+                                <img
+                                    className="p-0"
+                                    src={getImageSrc()}
+                                />
+                                </div>
+                            </div>
+                            <Modal cropData={cropData} setCropData={setCropData} setFinalImage={setFinalImage} finalImage={finalImage}/>
+                            <button className='btn btn-neutral' onClick={signOut}>Signout</button>
+                            {/* <button className='btn btn-neutral' onClick={openModal}>Open Modal</button> */}
+                        </div>
+                    </div>
+
                     {isHelp && 
                     <div role="alert" className="alert alert-info max-w-2xl mb-5">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>

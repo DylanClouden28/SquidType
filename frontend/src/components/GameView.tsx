@@ -14,19 +14,25 @@ interface gameViewProps {
 const GameView: React.FC<gameViewProps> = ({gameState, setGameState, username}) => {
     const baseUrl: string = import.meta.env.VITE_Backend_URL
     
-    const mockUsers = ['User1', "Dylan", "Chris", "Steve", "Steve", "Steve", "Steve"]
-
     const typeBox = useRef(null);
 
     const [counter, setCounter]= useState(-1);
 
     const [myWPM, setMyWPM] = useState(0);
 
+    const [isComplete, setComplete] = useState(false);
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+
+
         setGameState(prevState => ({
             ...prevState,
             currentParagraph: e.target.value
         }))
+
+        if (e.target.value === gameState.TargetParagraph){
+            setComplete(true);
+        }
     }
 
     const sortedPlayers = gameState.Players.sort((a, b) => {
@@ -47,7 +53,8 @@ const GameView: React.FC<gameViewProps> = ({gameState, setGameState, username}) 
     }, [gameState.Players])
 
  
-    const comparisonText = () =>{
+    const comparisonText = (paragraph: string) =>{
+        console.log(paragraph)
         let text = [];
         let error = false;
         let leadUser = undefined
@@ -63,8 +70,8 @@ const GameView: React.FC<gameViewProps> = ({gameState, setGameState, username}) 
             let drawLeadUser = leadUserTextLength ? (leadUserTextLength > i ? true : false) : false
 
 
-            if (gameState.currentParagraph.length > i){
-                acutalChar = gameState.currentParagraph[i];
+            if (paragraph.length > i){
+                acutalChar = paragraph[i];
             }
 
             if (acutalChar === undefined){
@@ -74,7 +81,7 @@ const GameView: React.FC<gameViewProps> = ({gameState, setGameState, username}) 
             else if(truthChar !== acutalChar){
                 // console.log("Error")
                 if (truthChar === " "){
-                    text.push(<span className={drawLeadUser ? "text-error underline underline-offset-8": "text-error"}key={i}>_</span>);
+                    text.push(<span className={drawLeadUser ? "text-error underline underline-offset-8": "text-error"}key={i}> </span>);
                 }else{
                     text.push(<span className={drawLeadUser ? "text-error underline underline-offset-8": "text-error"} key={i}>{truthChar}</span>);
                 }
@@ -125,26 +132,46 @@ const GameView: React.FC<gameViewProps> = ({gameState, setGameState, username}) 
         }
     })
 
+    const getMyPlayer = sortedPlayers.find((Player) => {
+        return Player.Username == username;
+    })
+
     return(
         <div>
-        <div className="flex justify-center items-center mb-4">
+        <div className="flex justify-center items-center my-4">
             <CurrentLights/>
         </div>
-        <div>
+        <div id="typing" className="card bg-base-100 p-4 mt-4 mx-10 h-fit mb-5">
+            <div className="text-center">
+                <span className="text-3xl font-bold italic text-accent">WPM: <span className="not-italic text-neutral-content">{myWPM}</span></span>
+            </div>
+            <div className="p-1">
+                <p className="select-none text-2xl font-mono">
+                {comparisonText(gameState.currentParagraph)}
+                </p>
+            </div>
+            <input disabled={getMyPlayer !== undefined ? Boolean(getMyPlayer?.IsDead) || isComplete: false} ref={typeBox} value={gameState.currentParagraph} onPaste={(e) => {e.preventDefault();}} onChange={handleInputChange} placeholder={getMyPlayer !== undefined ? getMyPlayer?.IsDead ? "Your dead that sucks": "Start typing here" : "Start typing here"} className="input input-lg input-bordered"></input>
+        </div> 
+
+        <div className="mb-2">
             <h1 className="text font-mono text-2xl text-center">Players Left <span className="countdown font-mono text-success text-xl">
             <span style={{"--value":playersleft}}></span>
             </span></h1>
         </div>
-        <div className="flex flex-col w-full justify-center items-center gap-y-6 h-96 overflow-y-auto pt-64">
-            {sortedPlayers.map(Player => 
-                <div id={`progess_${Player.Username}`} className="flex flex-row bg-base-100 p-2 card w-5/6">
+
+        <div className="grid grid-cols-3 w-full items-center gap-y-4 gap-x-4 h-96 overflow-y-scroll m-4">
+            {sortedPlayers.map((Player, index) => 
+                <div id={`progess_${Player.Username}`} className={index == 0 ? "flex flex-row bg-base-100 p-2 card m-0 tooltip tooltip-bottom col-span-3": "flex flex-row bg-base-100 p-2 card m-0 tooltip tooltip-bottom"} 
+                data-tip={
+                    gameState.TargetParagraph.slice(0, Number(Player.CurrentPercentage))
+                    } >
                     <div className="avatar flex flex-col h-16 w-16">
                         <div className="rounded-full">
                         <img src={`${baseUrl}/public/images/${Player.Username}.png`} alt="no profile" />
                         </div>
                     </div>
                     <div className="flex flex-col text-xl justify-center items-center mx-2 w-full">
-                        {Player.IsDead ? "💀 " + Player.Username : Player.Username}
+                        <span className={Player.Username == username ? "text-bold italic text-xl text-secondary": "text-bold text-lg"}>{Player.IsDead ? "💀 " + Player.Username : Player.Username}</span>
                         <progress 
                         className={Player.IsDead ? "progress progress-error w-full h-5 transition-all duration-150 ease-in-out": 
                         "progress progress-success w-full h-5 transition-all duration-150 ease-in-out"} 
@@ -160,18 +187,6 @@ const GameView: React.FC<gameViewProps> = ({gameState, setGameState, username}) 
             )}
         </div>
 
-        <div id="typing" className="card bg-base-100 p-4 mt-4 mx-10 h-fit">
-            <div className="text-center">
-                <span className="text-2xl font-bold italic text-accent">WPM: <span className="not-italic text-neutral-content">{myWPM}</span></span>
-            </div>
-            <div className="p-4">
-                <p className="select-none">
-                {comparisonText()}
-                </p>
-            </div>
-            <input ref={typeBox} value={gameState.currentParagraph} onPaste={(e) => {e.preventDefault();}} onChange={handleInputChange} placeholder="Start typing here" className="input input-md input-bordered"></input>
-        </div> 
-        
         <button className="btn btn-primary" onClick={startCountDown}>Start CountDown</button>
         <audio id="gostart"><source src={goSound}></source></audio>
         {counter > -1 &&
