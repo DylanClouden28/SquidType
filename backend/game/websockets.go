@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sluggers/controller"
+	"sluggers/database"
 	"sluggers/models"
 
 	"context"
@@ -46,6 +47,13 @@ type readyMessage struct {
 	MessageType string `json:"messageType"`
 	Data        struct {
 		IsReady bool `json:"isReady"`
+	}
+}
+
+type gameMessage struct {
+	MessageType string `json:"messageType"`
+	Data        struct {
+		Typed string `json:"typed"`
 	}
 }
 
@@ -134,7 +142,7 @@ func websocketHandler(c *gin.Context) {
 				fmt.Println(err)
 				continue
 			}
-			sendAll(js, context)
+			SendAll(js, context)
 			continue
 		case "reactionMessage":
 			var emoji reactionMessage
@@ -150,7 +158,21 @@ func websocketHandler(c *gin.Context) {
 			if err != nil {
 				fmt.Println(err)
 			}
-			sendAll(js, context)
+			SendAll(js, context)
+			continue
+		case "readyMessage":
+			var ready readyMessage
+			err = json.Unmarshal(rawMess, &ready)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			for i := 0; i < len(*GameState.Players); i++ {
+				if (*GameState.Players)[i].Username == username {
+					(*GameState.Players)[i].IsReady = ready.Data.IsReady
+				}
+			}
+			IsGameReady()
 			continue
 		default:
 			fmt.Println("Message type not an option")
@@ -169,7 +191,7 @@ func removeFromSlice(clients []*websocket.Conn, conn *websocket.Conn) []*websock
 	return clients
 }
 
-func sendAll(json []byte, context context.Context) {
+func SendAll(json []byte, context context.Context) {
 	for i := 0; i < len(Clients); i++ {
 		err := Clients[i].Write(context, websocket.MessageText, json)
 		if err != nil {
