@@ -19,6 +19,13 @@ const (
 	Off
 )
 
+const (
+	Lobby = iota
+	Game
+	Winner
+	BetweenRound
+)
+
 type gameState struct {
 	Players          *[]player
 	Round            int
@@ -31,9 +38,15 @@ type gameState struct {
 
 type gameUpdate struct {
 	Players      *[]player `json:"players"`
-	CurrentLight int       `json:"currentLight"`
+	CurrentLight string    `json:"currentLight"`
+	State        string    `json:"currentState"`
 	MessageType  string    `json:"MessageType"`
 	GameOver     bool
+}
+
+type stateUpdate struct {
+	CurrentState string `json:"currentState"`
+	Players      string `json:"players"`
 }
 
 type roundStart struct {
@@ -68,15 +81,18 @@ func GameLoop() {
 	for {
 		// locks mutex and waits for players to be in lobby
 		// waiting unlocks mutexx
-		// TODO replace with ready up
+		// TODO replace with ready up ie proper lobby state
 		GameState.Lock.Lock()
 		for len(*GameState.Players) == 0 {
 			GameState.Cond.Wait()
 		}
+		// set all players to alive and percentage to 0
 		for i := 0; i < len(*GameState.Players); i++ {
 			(*GameState.Players)[i].IsDead = false
 			(*GameState.Players)[i].CurrentPercentage = 0.0
 		}
+		// set new target message
+		// TODO generate target message in some way
 		GameState.TargetMessage = "Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore culpa sint ad nisi Lorem pariatur mollit ex esse exercitation amet. Nisi anim cupidatat excepteur officia. Reprehenderit nostrud nostrud ipsum Lorem est aliquip amet voluptate voluptate dolor minim nulla est proident. Nostrud officia pariatur ut officia. Sit irure elit esse ea nulla sunt ex occaecat reprehenderit commodo officia dolor Lorem duis laboris cupidatat officia voluptate. Culpa proident adipisicing id nulla nisi laboris ex in Lorem sunt duis officia eiusmod. Aliqua reprehenderit commodo ex non excepteur duis sunt velit enim. Voluptate laboris sint cupidatat ullamco ut ea consectetur et est culpa et culpa duis."
 		// start := roundStart{MessageType: "roundStart", TargetMessage: GameState.TargetMessage}
 

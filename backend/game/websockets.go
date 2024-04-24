@@ -42,6 +42,13 @@ type reactionMessage struct {
 	} `json:"data"`
 }
 
+type readyMessage struct {
+	MessageType string `json:"messageType"`
+	Data        struct {
+		IsReady bool `json:"isReady"`
+	}
+}
+
 func Route(router *gin.Engine) {
 	game := router.Group("/api/ws")
 	{
@@ -90,6 +97,7 @@ func websocketHandler(c *gin.Context) {
 		}
 		fmt.Println("Recieved baseMess | type: ", baseMess.MessageType, " | rawJson: ", rawMess)
 
+		// TODO when user connects to websocket, send out current game state
 		switch baseMess.MessageType {
 		case "yoyo":
 			fmt.Println("Recieved yoyo")
