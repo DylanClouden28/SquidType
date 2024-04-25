@@ -15,6 +15,7 @@ type player struct {
 	IsDead            bool
 	CurrentPercentage float64
 	IsReady           bool
+	Rank              int
 }
 
 const (
@@ -39,6 +40,7 @@ type gameState struct {
 	PreviousLightEnd time.Time
 	TargetMessage    string
 	currentState     int
+	Rank             int
 	Lock             sync.Mutex
 	Cond             *sync.Cond
 }
@@ -59,30 +61,29 @@ type stateUpdate struct {
 var GameState *gameState
 
 func incomingMessage(mess gameMessage, username string) {
-	if GameState.CurrentLight == Red && !GameState.PreviousLightEnd.Before(time.Now().Add(time.Millisecond*100)) {
-		for i := 0; i < len(*GameState.Players); i++ {
-			if (*GameState.Players)[i].Username == username {
-				(*GameState.Players)[i].IsDead = true
-				roundOverCheck()
-				return
-			}
+	j := 0
+	for i := 0; i < len(*GameState.Players); i++ {
+		if (*GameState.Players)[i].Username == username {
+			j = i
 		}
+	}
+	if (*GameState.Players)[j].IsDead == true {
+		return
+	}
+	if GameState.CurrentLight == Red && !GameState.PreviousLightEnd.Before(time.Now().Add(time.Millisecond*100)) {
+		(*GameState.Players)[j].IsDead = true
+		(*GameState.Players)[j].Rank = GameState.Rank
+		GameState.Rank += 1
+		roundOverCheck()
+		return
 	}
 	completed := 0.0
 	if strings.HasPrefix(GameState.TargetMessage, mess.Data.Typed) {
 		completed = float64(len(mess.Data.Typed)) / float64(len(GameState.TargetMessage))
 	}
-
-	for i := 0; i < len(*GameState.Players); i++ {
-		if (*GameState.Players)[i].Username == username {
-			if (*GameState.Players)[i].CurrentPercentage < completed {
-				//GameState.Lock.Lock()
-				//defer GameState.Lock.Unlock()
-				(*GameState.Players)[i].CurrentPercentage = completed
-			}
-		}
+	if (*GameState.Players)[j].CurrentPercentage < completed {
+		(*GameState.Players)[j].CurrentPercentage = completed
 	}
-	return
 }
 
 var playersReady chan bool
@@ -159,6 +160,7 @@ func roundOverCheck() {
 func isGameOver() bool {
 	// returns true if there is 1 player alive
 	// otherwise false
+	fmt.Println(len(*GameState.Players), " players in game")
 	for i := 0; i < len(*GameState.Players); i++ {
 		if !(*GameState.Players)[i].IsDead {
 			return false
@@ -170,12 +172,19 @@ func isGameOver() bool {
 func GameLoop() {
 	// primary game loop
 	// will always be running
+	p := make([]player, 0)
+	GameState = &gameState{Players: &p}
 	GameState.Cond = sync.NewCond(&GameState.Lock)
 	playersReady = make(chan bool)
 	isRoundOver = new(bool)
 	backgroundContext = context.Background()
+	fmt.Println("starting gameplay loop, waiting for players to ready")
+	fmt.Println(*isRoundOver, "is round over", isRoundOver)
+	GameState.currentState = Lobby
 	for {
 		<-playersReady
+		// TODO remove any pleyers from slice that are not connected
+		fmt.Println("players ready; starting game")
 		// waits for enough players to be readied up
 		GameState.TargetMessage = "Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore culpa sint ad nisi Lorem pariatur mollit ex esse exercitation amet. Nisi anim cupidatat excepteur officia. Reprehenderit nostrud nostrud ipsum Lorem est aliquip amet voluptate voluptate dolor minim nulla est proident. Nostrud officia pariatur ut officia. Sit irure elit esse ea nulla sunt ex occaecat reprehenderit commodo officia dolor Lorem duis laboris cupidatat officia voluptate. Culpa proident adipisicing id nulla nisi laboris ex in Lorem sunt duis officia eiusmod. Aliqua reprehenderit commodo ex non excepteur duis sunt velit enim. Voluptate laboris sint cupidatat ullamco ut ea consectetur et est culpa et culpa duis."
 		GameState.currentState = Game
@@ -184,11 +193,13 @@ func GameLoop() {
 		go gameUpdateSender()
 		// starts sending out updates of the game state
 		// TODO for loop for as long as game is going on ie more than 1 player alive
-		// that for loop needs for loop handling individual rounds
+		// with maybe something to end the game no matter what when 1 player is alive
+		// TODO for loop for handling individual rounds in a game
 		// and the progression will be green light > yellow > red, with each having
 		// a random duration. Each time a player dies a check is made if the round should
 		// end, so the isRoundOver is handled outside this function
-		// the round ends is isRoundOver is true and the light is red
+		// the round ends is isRoundOver is true and the light is red would need to implement
+		// some way of waking up if the round ends mid red light
 		// TODO logic for the game ending, resetting values and ending for loop
 		// for a new game to start
 		// set all players to alive and percentage to 0
@@ -200,19 +211,25 @@ func GameLoop() {
 		// TODO generate target message in some way
 		// start := roundStart{MessageType: "roundStart", TargetMessage: GameState.TargetMessage}
 		//
-		for isGameOver() {
+		for !isGameOver() {
 			// runs as long as game is not over
-			for !*isRoundOver {
+			for !(*isRoundOver) && !isGameOver() {
 				GameState.CurrentLight = Green
+				fmt.Println("light is now: ", GameState.CurrentLight)
 				duration := time.Duration(rand.Intn(5)+5) * time.Second
 				GameState.CurrentLightEnds = time.Now().Add(time.Second * duration)
 				time.Sleep(duration)
 				GameState.CurrentLight = Yellow
+				fmt.Println("light is now: ", GameState.CurrentLight)
 				duration = time.Duration(rand.Intn(4)+1) * time.Second
 				GameState.PreviousLightEnd = time.Now().Add(duration)
 				time.Sleep(duration)
 				GameState.CurrentLight = Red
+				fmt.Println("light is now: ", GameState.CurrentLight)
 				duration = time.Duration(rand.Intn(4) + 1)
+			}
+			if isGameOver() {
+				break
 			}
 			GameState.currentState = BetweenRound
 			sendCurrentState()
@@ -228,6 +245,7 @@ func GameLoop() {
 		}
 		GameState.currentState = Winner
 		sendCurrentState()
+		// TODO set all playesr back to not ready
 		// TODO send the ranking for the winner page
 		// TODO keep track of when players die for rankings
 

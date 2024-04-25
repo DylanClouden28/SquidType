@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sluggers/controller"
-	"sluggers/database"
+	//"sluggers/database"
 	"sluggers/models"
 
 	"context"
@@ -88,12 +88,21 @@ func websocketHandler(c *gin.Context) {
 	defer func() {
 		Clients = removeFromSlice(Clients, conn)
 		conn.Close(websocket.StatusNormalClosure, "bye bye")
+		for i := 0; i < len(*GameState.Players); i++ {
+			if (*GameState.Players)[i].Username == username {
+				(*GameState.Players)[i].IsDead = true
+			}
+		}
 	}()
+	newPlayer := player{Username: username}
+	*GameState.Players = append(*GameState.Players, newPlayer)
+	sendCurrentState()
 
 	for {
 		var rawMess json.RawMessage
 		err := wsjson.Read(context, conn, &rawMess)
 		if err != nil {
+			fmt.Println(err)
 			break
 		}
 
@@ -167,6 +176,7 @@ func websocketHandler(c *gin.Context) {
 				fmt.Println(err)
 				continue
 			}
+			fmt.Println(len(*GameState.Players))
 			for i := 0; i < len(*GameState.Players); i++ {
 				if (*GameState.Players)[i].Username == username {
 					(*GameState.Players)[i].IsReady = ready.Data.IsReady
