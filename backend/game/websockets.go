@@ -57,6 +57,10 @@ type gameMessage struct {
 	}
 }
 
+type pongMessage struct {
+	MessageType string `json:"messageType"`
+}
+
 func Route(router *gin.Engine) {
 	game := router.Group("/api/ws")
 	{
@@ -88,14 +92,20 @@ func websocketHandler(c *gin.Context) {
 	defer func() {
 		Clients = removeFromSlice(Clients, conn)
 		conn.Close(websocket.StatusNormalClosure, "bye bye")
-		for i := 0; i < len(*GameState.Players); i++ {
-			if (*GameState.Players)[i].Username == username {
-				(*GameState.Players)[i].IsDead = true
+		if GameState.currentState == Lobby {
+			size := len(*GameState.Players)
+			for i := 0; i < size; i++ {
+				if (*GameState.Players)[i].Username == username {
+					(*GameState.Players)[i] = (*GameState.Players)[size-1]
+					*GameState.Players = (*GameState.Players)[:size-1]
+				}
 			}
 		}
 	}()
 	newPlayer := player{Username: username}
-	*GameState.Players = append(*GameState.Players, newPlayer)
+	if GameState.currentState == Lobby {
+		*GameState.Players = append(*GameState.Players, newPlayer)
+	}
 	sendCurrentState()
 
 	for {
@@ -114,7 +124,6 @@ func websocketHandler(c *gin.Context) {
 		}
 		fmt.Println("Recieved baseMess | type: ", baseMess.MessageType, " | rawJson: ", rawMess)
 
-		// TODO when user connects to websocket, send out current game state
 		switch baseMess.MessageType {
 		case "yoyo":
 			fmt.Println("Recieved yoyo")
@@ -183,6 +192,9 @@ func websocketHandler(c *gin.Context) {
 				}
 			}
 			IsGameReady()
+			continue
+		case "pongMessage":
+			*GameState.Players = append(*GameState.Players, newPlayer)
 			continue
 		default:
 			fmt.Println("Message type not an option")

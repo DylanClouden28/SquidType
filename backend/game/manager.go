@@ -54,7 +54,7 @@ type gameUpdate struct {
 type stateUpdate struct {
 	CurrentState  string    `json:"currentState"`
 	Players       *[]player `json:"players"`
-	MessageType   string    `json:"MessageTyep"`
+	MessageType   string    `json:"MessageType"`
 	TargetMessage string    `json:"targetMessage"`
 }
 
@@ -127,7 +127,7 @@ func sendCurrentState() {
 }
 
 func gameUpdateSender() {
-	for !(*isRoundOver) {
+	for {
 		light := ""
 		switch GameState.CurrentLight {
 		case Off:
@@ -160,7 +160,6 @@ func roundOverCheck() {
 func isGameOver() bool {
 	// returns true if there is 1 player alive
 	// otherwise false
-	fmt.Println(len(*GameState.Players), " players in game")
 	for i := 0; i < len(*GameState.Players); i++ {
 		if !(*GameState.Players)[i].IsDead {
 			return false
@@ -181,6 +180,7 @@ func GameLoop() {
 	fmt.Println("starting gameplay loop, waiting for players to ready")
 	fmt.Println(*isRoundOver, "is round over", isRoundOver)
 	GameState.currentState = Lobby
+	go gameUpdateSender()
 	for {
 		<-playersReady
 		// TODO remove any pleyers from slice that are not connected
@@ -190,7 +190,6 @@ func GameLoop() {
 		GameState.currentState = Game
 		sendCurrentState()
 		// sets current state to game and sends that updated state to users
-		go gameUpdateSender()
 		// starts sending out updates of the game state
 		// TODO for loop for as long as game is going on ie more than 1 player alive
 		// with maybe something to end the game no matter what when 1 player is alive
@@ -200,17 +199,10 @@ func GameLoop() {
 		// end, so the isRoundOver is handled outside this function
 		// the round ends is isRoundOver is true and the light is red would need to implement
 		// some way of waking up if the round ends mid red light
-		// TODO logic for the game ending, resetting values and ending for loop
-		// for a new game to start
-		// set all players to alive and percentage to 0
-		//for i := 0; i < len(*GameState.Players); i++ {
-		//	(*GameState.Players)[i].IsDead = false
-		//	(*GameState.Players)[i].CurrentPercentage = 0.0
-		//}
-		// set new target message
 		// TODO generate target message in some way
 		// start := roundStart{MessageType: "roundStart", TargetMessage: GameState.TargetMessage}
 		//
+		time.Sleep(time.Second * 10)
 		for !isGameOver() {
 			// runs as long as game is not over
 			for !(*isRoundOver) && !isGameOver() {
@@ -240,15 +232,19 @@ func GameLoop() {
 			GameState.currentState = Game
 			GameState.TargetMessage = "New Message Here"
 			sendCurrentState()
-			time.Sleep(time.Second * 3)
+			time.Sleep(time.Second * 10)
 			*isRoundOver = false
 		}
 		GameState.currentState = Winner
 		sendCurrentState()
+		time.Sleep(time.Second * 10)
+		*GameState.Players = make([]player, 0)
 		// TODO set all playesr back to not ready
 		// TODO send the ranking for the winner page
 		// TODO keep track of when players die for rankings
-
+		ping := "{\"messageType\":\"pingMessage\"}"
+		SendAll([]byte(ping), backgroundContext)
+		GameState.currentState = Lobby
+		sendCurrentState()
 	}
-
 }
