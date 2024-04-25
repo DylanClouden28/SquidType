@@ -4,27 +4,45 @@ import Fireworks from './FireWork'
 import deadSkull from '../assets/deadSkull.png'
 import { GameState } from "../interfaces/game"
 import { useFormAction } from "react-router-dom"
+import { SendMessage } from "react-use-websocket"
+import { ReadyWSMessage } from "../interfaces/websockets"
 
 interface LobbyViewProps {
     gameState: GameState
     setGameState: React.Dispatch<React.SetStateAction<GameState>>
     username: string
+    sendMessage: SendMessage
 }
 
 
-const LobbyView: React.FC<LobbyViewProps> = ({gameState, setGameState, username}) => {
+const LobbyView: React.FC<LobbyViewProps> = ({gameState, setGameState, username, sendMessage}) => {
     
     const [ready, setReady] = useState(false)
     const [numReady, setNumReady]= useState(0)
     const baseUrl: string = import.meta.env.VITE_Backend_URL
+
+    const sendReadyUp = (isReady: boolean) => {
+        const readyMess: ReadyWSMessage = {
+            messageType: "readyMessage",
+            data : {
+                isReady: isReady
+            }
+        }
+        sendMessage(JSON.stringify(readyMess));
+    }
+
     const handleReadyClick = () => {
-        setReady(!ready);
+        setReady((prevState) => {
+
+            sendReadyUp(!prevState);
+            return !prevState;
+        });
     }
 
     const countNumReady = () =>{
         let count = 0;
         gameState.Players.forEach(player => {
-            if(player.isReady){
+            if(player.IsReady){
                count += 1;
             }
         })
@@ -50,11 +68,11 @@ const LobbyView: React.FC<LobbyViewProps> = ({gameState, setGameState, username}
                     <div className="flex justify-center items-center p-4 flex-col">
                     <span className={Player.Username == username ? "text-bold italic text-xl text-secondary": "text-bold text-lg"}>{Player.Username}</span>
                     <div className="avatar flex flex-col h-32 w-32">
-                        <div className={Player.isReady ? "rounded-full ring ring-success": "rounded-full ring ring-error"}>
+                        <div className={Player.IsReady ? "rounded-full ring ring-success": "rounded-full ring ring-error"}>
                             <img src={`${baseUrl}/public/images/${Player.Username}.png`} alt="no profile" />
                         </div>
                     </div>
-                    <span className={Player.isReady ? "text-bold text-success": "text-bold text-error"}>{Player.isReady ? "Ready": "Not Ready"}</span>
+                    <span className={Player.IsReady ? "text-bold text-success": "text-bold text-error"}>{Player.IsReady ? "Ready": "Not Ready"}</span>
                     </div>
                 )}
                 <div>

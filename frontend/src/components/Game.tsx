@@ -1,3 +1,4 @@
+import { SendMessage } from "react-use-websocket"
 import { GameState } from "../interfaces/game"
 import GameView from "./GameView"
 import LobbyView from "./lobbyView"
@@ -8,16 +9,17 @@ interface GameProps {
     gameState: GameState
     setGameState: React.Dispatch<React.SetStateAction<GameState>>
     username: string
+    sendMessage: SendMessage
 }
 
 
 
-const Game: React.FC<GameProps> = ({gameState, setGameState, username}) =>{
+const Game: React.FC<GameProps> = ({gameState, setGameState, username, sendMessage}) =>{
 
     if (gameState.currentState === 'lobby'){
         return(
             <div className="flex justify-center items-center h-screen">
-                <LobbyView gameState={gameState} setGameState={setGameState} username={username}/>
+                <LobbyView gameState={gameState} setGameState={setGameState} username={username} sendMessage={sendMessage}/>
             </div>
         )
     }

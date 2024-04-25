@@ -109,22 +109,6 @@ const GameView: React.FC<gameViewProps> = ({gameState, setGameState, username}) 
             </div>);
     }
 
-    const startCountDown = () => {
-        setCounter(3);
-        document.getElementById("gostart").play();
-    
-        const id = setInterval(() => {
-            setCounter((prevCount) => {
-                if (prevCount === -1){
-                    clearInterval(id)
-                }
-                if (prevCount === 0){
-                    typeBox.current.focus();
-                }
-                return prevCount - 1;
-            })
-        }, 1000) 
-    }
     let playersleft = 0;
     const playersLeftCounter = sortedPlayers.forEach((player) => {
         if (!player.IsDead){
@@ -150,7 +134,7 @@ const GameView: React.FC<gameViewProps> = ({gameState, setGameState, username}) 
                 {comparisonText(gameState.currentParagraph)}
                 </p>
             </div>
-            <input disabled={getMyPlayer !== undefined ? Boolean(getMyPlayer?.IsDead) || isComplete: false} ref={typeBox} value={gameState.currentParagraph} onPaste={(e) => {e.preventDefault();}} onChange={handleInputChange} placeholder={getMyPlayer !== undefined ? getMyPlayer?.IsDead ? "Your dead that sucks": "Start typing here" : "Start typing here"} className="input input-lg input-bordered"></input>
+            <input id="game-input" disabled={getMyPlayer !== undefined ? Boolean(getMyPlayer?.IsDead) || isComplete: false} ref={typeBox} value={gameState.currentParagraph} onPaste={(e) => {e.preventDefault();}} onChange={handleInputChange} placeholder={getMyPlayer !== undefined ? getMyPlayer?.IsDead ? "Your dead that sucks": "Start typing here" : "Start typing here"} className="input input-lg input-bordered"></input>
         </div> 
 
         <div className="mb-2">
@@ -187,18 +171,8 @@ const GameView: React.FC<gameViewProps> = ({gameState, setGameState, username}) 
             )}
         </div>
 
-        <button className="btn btn-primary" onClick={startCountDown}>Start CountDown</button>
+        {/* <button className="btn btn-primary" onClick={startCountDown}>Start CountDown</button> */}
         <audio id="gostart"><source src={goSound}></source></audio>
-        {counter > -1 &&
-        
-            <div className="inset-0 z-10 fixed flex items-center justify-center p-4">
-                <p className="text-9xl font-bold bg-base-300"></p>
-                <span className="countdown">
-                <span className="text-9xl" style={{"--value":counter}}></span>
-                </span>
-            </div>
-        
-        }
         <div className="z-0">
             {/* <Fireworks /> */}
         </div>

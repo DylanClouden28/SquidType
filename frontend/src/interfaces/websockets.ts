@@ -1,3 +1,5 @@
+import { Player } from "./game";
+
 export interface Reaction{
     username: string;
     emoji: string;
@@ -11,7 +13,6 @@ export interface ChatMessage{
     reaction: Reaction[];
     uuid: string;
 }
-
 
 export interface baseWSMessage{
     messageType: string;
@@ -27,4 +28,31 @@ export interface reactionWSMessage extends baseWSMessage{
     data: {
         reaction: Reaction;
     }
+}
+
+export interface ReadyWSMessage extends baseWSMessage{
+    data: {
+        isReady: boolean;
+    }
+}
+
+export interface baseStateUpdate extends baseWSMessage {
+    currentState: 'lobby' | 'game' | 'winner' | 'betweenRound'
+}
+
+export interface gameStateUpdate extends baseStateUpdate {
+    currentState: 'game'
+    players: Player[]
+    targetMessage: string
+}
+
+export interface lobbyStateUpdate extends baseStateUpdate {
+    currentState: 'lobby'
+    players: Player[]
+    targetMessage: string
+}
+
+export interface overAllGameUpdate extends baseWSMessage {
+    players: Player[]
+    currentLight: string
 }

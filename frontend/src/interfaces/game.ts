@@ -2,7 +2,7 @@ export interface Player{
     Username: string;
     IsDead: Boolean;
     CurrentPercentage: string;
-    isReady: false;
+    IsReady: false;
     WPM: number
     lastRoundWPM: number
 }
