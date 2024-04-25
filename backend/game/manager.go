@@ -49,6 +49,7 @@ type gameUpdate struct {
 	Players      *[]player `json:"players"`
 	CurrentLight string    `json:"currentLight"`
 	MessageType  string    `json:"MessageType"`
+	CurrentState string    `json:"currentState"`
 }
 
 type stateUpdate struct {
@@ -139,7 +140,18 @@ func gameUpdateSender() {
 		case Yellow:
 			light = "yellow"
 		}
-		update := gameUpdate{MessageType: "gameUpdate", Players: GameState.Players, CurrentLight: light}
+		state := ""
+		switch GameState.currentState {
+		case Lobby:
+			state = "lobby"
+		case Game:
+			state = "game"
+		case Winner:
+			state = "winner"
+		case BetweenRound:
+			state = "betweenRound"
+		}
+		update := gameUpdate{MessageType: "gameUpdate", Players: GameState.Players, CurrentLight: light, CurrentState: state}
 		js, err := json.Marshal(update)
 		if err != nil {
 			fmt.Println(err)
