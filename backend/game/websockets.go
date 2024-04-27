@@ -81,6 +81,13 @@ func websocketHandler(c *gin.Context) {
 		fmt.Println("User tryed to connect to websocket was not logged in")
 		return
 	}
+	for i := 0; i < len(*GameState.Players); i++ {
+		if (*GameState.Players)[i].Username == username && (*GameState.Players)[i].isConn {
+			c.JSON(400, "user already logged in")
+			fmt.Println("user already logged in")
+			return
+		}
+	}
 
 	conn, err := websocket.Accept(c.Writer, c.Request, nil)
 	if err != nil {
@@ -92,17 +99,19 @@ func websocketHandler(c *gin.Context) {
 	defer func() {
 		Clients = removeFromSlice(Clients, conn)
 		conn.Close(websocket.StatusNormalClosure, "bye bye")
-		if GameState.currentState == Lobby {
-			size := len(*GameState.Players)
-			for i := 0; i < size; i++ {
-				if (*GameState.Players)[i].Username == username {
+		size := len(*GameState.Players)
+		for i := 0; i < size; i++ {
+			if (*GameState.Players)[i].Username == username {
+				if GameState.currentState == Lobby {
 					(*GameState.Players)[i] = (*GameState.Players)[size-1]
 					*GameState.Players = (*GameState.Players)[:size-1]
+				} else {
+					(*GameState.Players)[i].isConn = false
 				}
 			}
 		}
 	}()
-	newPlayer := player{Username: username}
+	newPlayer := player{Username: username, isConn: true}
 	if GameState.currentState == Lobby {
 		*GameState.Players = append(*GameState.Players, newPlayer)
 	}
