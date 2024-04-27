@@ -234,6 +234,17 @@ func GameLoop() {
 		//
 		time.Sleep(time.Second * 10)
 		for !isGameOver() {
+			GameState.DeadRound = 0
+			GameState.DeadTarget = 0
+			alive := 0
+			for i := 0; i < len(*GameState.Players); i++ {
+				if !(*GameState.Players)[i].IsDead {
+					alive++
+				}
+			}
+			if alive > 3 {
+				GameState.DeadTarget = ((alive - 1) / 2) + 1
+			}
 			// runs as long as game is not over
 			for !(*isRoundOver) && !isGameOver() {
 				GameState.CurrentLight = Green
@@ -261,16 +272,6 @@ func GameLoop() {
 			sendCurrentState()
 			for i := 0; i < len(*GameState.Players); i++ {
 				(*GameState.Players)[i].CurrentPercentage = 0.0
-			}
-			GameState.DeadRound = 0
-			alive := 0
-			for i := 0; i < len(*GameState.Players); i++ {
-				if !(*GameState.Players)[i].IsDead {
-					alive++
-				}
-			}
-			if alive > 3 {
-				GameState.DeadTarget = ((alive - 1) / 2) + 1
 			}
 			time.Sleep(time.Second * 10)
 			GameState.currentState = Game
