@@ -22,104 +22,104 @@ const CONNECTION_STATUS_CLOSED: number  = 3;
 
 const enablePolling = false;
 
-// const mockPlayers: Player[] = [
-//     {
-//         Username: "Dylan",
-//         IsDead: true,
-//         CurrentPercentage: "90",
-//         isReady: false,
-//         WPM: 40,
-//         lastRoundWPM: 50,
-//     },
-//     {
-//         Username: "Joe",
-//         IsDead: false,
-//         CurrentPercentage: "70",
-//         isReady: false,
-//         WPM: 50,
-//         lastRoundWPM: 70,
-//     },
-//     {
-//         Username: "Steve",
-//         IsDead: false,
-//         CurrentPercentage: "56",
-//         isReady: false,
-//         WPM: 60,
-//         lastRoundWPM: 50,
-//     },
-//     {
-//         Username: "Steve",
-//         IsDead: false,
-//         CurrentPercentage: "34",
-//         isReady: false,
-//         WPM: 70,
-//         lastRoundWPM: 30,
-//     },
-//     {
-//         Username: "Steve",
-//         IsDead: false,
-//         CurrentPercentage: "33",
-//         isReady: false,
-//         WPM: 80,
-//         lastRoundWPM: 20,
-//     },
-//     {
-//         Username: "Bottom",
-//         IsDead: false,
-//         CurrentPercentage: "20",
-//         isReady: false,
-//         WPM: 90,
-//         lastRoundWPM: 10,
-//     },
-//     {
-//         Username: "Steve",
-//         IsDead: false,
-//         CurrentPercentage: "10",
-//         isReady: false,
-//         WPM: 70,
-//         lastRoundWPM: 30,
-//     },
-//     {
-//         Username: "Steve",
-//         IsDead: false,
-//         CurrentPercentage: "5",
-//         isReady: false,
-//         WPM: 80,
-//         lastRoundWPM: 20,
-//     },
-//     {
-//         Username: "Bottom",
-//         IsDead: false,
-//         CurrentPercentage: "67",
-//         isReady: false,
-//         WPM: 90,
-//         lastRoundWPM: 10,
-//     },
-//     {
-//         Username: "Steve",
-//         IsDead: false,
-//         CurrentPercentage: "7",
-//         isReady: false,
-//         WPM: 70,
-//         lastRoundWPM: 30,
-//     },
-//     {
-//         Username: "Steve",
-//         IsDead: false,
-//         CurrentPercentage: "80",
-//         isReady: false,
-//         WPM: 80,
-//         lastRoundWPM: 20,
-//     },
-//     {
-//         Username: "Bottom",
-//         IsDead: false,
-//         CurrentPercentage: "45",
-//         isReady: false,
-//         WPM: 90,
-//         lastRoundWPM: 10,
-//     },
-// ]
+const mockPlayers: Player[] = [
+    {
+        Username: "Dylan",
+        IsDead: true,
+        CurrentPercentage: "90",
+        isReady: false,
+        WPM: 40,
+        lastRoundWPM: 50,
+    },
+    {
+        Username: "Joe",
+        IsDead: false,
+        CurrentPercentage: "70",
+        isReady: false,
+        WPM: 50,
+        lastRoundWPM: 70,
+    },
+    {
+        Username: "Steve",
+        IsDead: false,
+        CurrentPercentage: "56",
+        isReady: false,
+        WPM: 60,
+        lastRoundWPM: 50,
+    },
+    {
+        Username: "Steve",
+        IsDead: false,
+        CurrentPercentage: "34",
+        isReady: false,
+        WPM: 70,
+        lastRoundWPM: 30,
+    },
+    {
+        Username: "Steve",
+        IsDead: false,
+        CurrentPercentage: "33",
+        isReady: false,
+        WPM: 80,
+        lastRoundWPM: 20,
+    },
+    {
+        Username: "Bottom",
+        IsDead: false,
+        CurrentPercentage: "20",
+        isReady: false,
+        WPM: 90,
+        lastRoundWPM: 10,
+    },
+    {
+        Username: "Steve",
+        IsDead: false,
+        CurrentPercentage: "10",
+        isReady: false,
+        WPM: 70,
+        lastRoundWPM: 30,
+    },
+    {
+        Username: "Steve",
+        IsDead: false,
+        CurrentPercentage: "5",
+        isReady: false,
+        WPM: 80,
+        lastRoundWPM: 20,
+    },
+    {
+        Username: "Bottom",
+        IsDead: false,
+        CurrentPercentage: "67",
+        isReady: false,
+        WPM: 90,
+        lastRoundWPM: 10,
+    },
+    {
+        Username: "Steve",
+        IsDead: false,
+        CurrentPercentage: "7",
+        isReady: false,
+        WPM: 70,
+        lastRoundWPM: 30,
+    },
+    {
+        Username: "Steve",
+        IsDead: false,
+        CurrentPercentage: "80",
+        isReady: false,
+        WPM: 80,
+        lastRoundWPM: 20,
+    },
+    {
+        Username: "Bottom",
+        IsDead: false,
+        CurrentPercentage: "45",
+        isReady: false,
+        WPM: 90,
+        lastRoundWPM: 10,
+    },
+]
 
 function home(){
     const baseUrl: string = import.meta.env.VITE_Backend_URL
@@ -304,27 +304,7 @@ function home(){
     useEffect(() => {
         console.log("Game State has been updated: ", gameState)
     }, [gameState])
-
-    const handleTypingMessage = useCallback(() => {
-
-        const currentText = gameState?.currentParagraph;
-        if (currentText === undefined) {
-            return
-        }
-
-        if (currentText.length > 1000){
-            return
-        }
-
-        const message = JSON.stringify({
-            messageType: 'input',
-            text: gameState?.currentParagraph
-        })
-        sendMessage(message);
-    }, []);
-
-    
-    
+        
     const nav = useNavigate();
 
     // const [isModalOpen, setIsModalOpen] = useState(false);

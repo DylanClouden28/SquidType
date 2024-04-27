@@ -2,16 +2,18 @@ import { useState, useRef, useEffect } from "react"
 import goSound from '../assets/goSound.mp3'
 import Fireworks from './FireWork'
 import deadSkull from '../assets/deadSkull.png'
+import { SendMessage } from "react-use-websocket"
 import { GameState, Player } from "../interfaces/game"
 
 interface gameViewProps {
     gameState: GameState
     setGameState: React.Dispatch<React.SetStateAction<GameState>>
     username: string
+    sendMessage: SendMessage
 }
 
 
-const GameView: React.FC<gameViewProps> = ({gameState, setGameState, username}) => {
+const GameView: React.FC<gameViewProps> = ({gameState, setGameState, username, sendMessage}) => {
     const baseUrl: string = import.meta.env.VITE_Backend_URL
     
     const typeBox = useRef(null);
@@ -33,6 +35,26 @@ const GameView: React.FC<gameViewProps> = ({gameState, setGameState, username}) 
         if (e.target.value === gameState.TargetParagraph){
             setComplete(true);
         }
+
+        handleTypingMessage(e.target.value)
+    }
+
+    const handleTypingMessage = (text: string) => {
+
+        const currentText = text;
+        if (currentText === undefined) {
+            return
+        }
+
+        if (currentText.length > 1000){
+            return
+        }
+
+        const message = JSON.stringify({
+            messageType: 'gameMessage',
+            typed: text
+        })
+        sendMessage(message);
     }
 
     const sortedPlayers = gameState.Players.sort((a, b) => {
@@ -149,6 +171,7 @@ const GameView: React.FC<gameViewProps> = ({gameState, setGameState, username}) 
                 data-tip={
                     gameState.TargetParagraph.slice(0, gameState.TargetParagraph.length * Number(Player.CurrentPercentage) / 100)
                     } >
+                    <span>#${index}</span>
                     <div className="avatar flex flex-col h-16 w-16">
                         <div className="rounded-full">
                         <img src={`${baseUrl}/public/images/${Player.Username}.png`} alt="no profile" />
