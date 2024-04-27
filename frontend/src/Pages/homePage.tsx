@@ -23,15 +23,6 @@ const CONNECTION_STATUS_CLOSED: number  = 3;
 const enablePolling = false;
 
 const mockPlayers: Player[] = [
-    {
-        Username: "Dylan",
-        IsDead: true,
-        CurrentPercentage: "90",
-        isReady: false,
-        WPM: 40,
-        lastRoundWPM: 50,
-    },
-    
 ]
 
 function home(){
@@ -65,7 +56,7 @@ function home(){
         Players: [],
         currentLight: 'green',
         currentRound: 0,
-        currentState: 'lobby',
+        currentState: 'betweenRound',
         TargetParagraph: "",
         currentParagraph: "",
         countDown: 10,

@@ -5,6 +5,7 @@ export interface Player{
     IsReady: false;
     WPM: number
     lastRoundWPM: number
+    Rank: number
 }
 
 export interface GameState{
