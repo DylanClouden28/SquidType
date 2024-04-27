@@ -259,7 +259,7 @@ func GameLoop() {
 		// TODO set all playesr back to not ready
 		// TODO send the ranking for the winner page
 		// TODO keep track of when players die for rankings
-		ping := "{\"messageType\":\"pingMessage\"}"
+		ping := "{\"MessageType\":\"pingMessage\"}"
 		SendAll([]byte(ping), backgroundContext)
 		GameState.currentState = Lobby
 		sendCurrentState()
