@@ -16,6 +16,7 @@ type player struct {
 	CurrentPercentage float64
 	IsReady           bool
 	Rank              int
+	isConn            bool
 }
 
 const (
@@ -43,6 +44,7 @@ type gameState struct {
 	DeadRound        int
 	DeadTarget       int
 	Rank             int
+	CountDown        int
 	Lock             sync.Mutex
 	Cond             *sync.Cond
 }
@@ -52,6 +54,7 @@ type gameUpdate struct {
 	CurrentLight string    `json:"currentLight"`
 	MessageType  string    `json:"MessageType"`
 	CurrentState string    `json:"currentState"`
+	countDown    int
 }
 
 type stateUpdate struct {
@@ -158,7 +161,7 @@ func gameUpdateSender() {
 		case BetweenRound:
 			state = "betweenRound"
 		}
-		update := gameUpdate{MessageType: "gameUpdate", Players: GameState.Players, CurrentLight: light, CurrentState: state}
+		update := gameUpdate{MessageType: "gameUpdate", Players: GameState.Players, CurrentLight: light, CurrentState: state, countDown: GameState.CountDown}
 		js, err := json.Marshal(update)
 		if err != nil {
 			fmt.Println(err)
@@ -217,8 +220,13 @@ func GameLoop() {
 		fmt.Println("players ready; starting game")
 		// waits for enough players to be readied up
 		GameState.TargetMessage = "Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore culpa sint ad nisi Lorem pariatur mollit ex esse exercitation amet. Nisi anim cupidatat excepteur officia. Reprehenderit nostrud nostrud ipsum Lorem est aliquip amet voluptate voluptate dolor minim nulla est proident. Nostrud officia pariatur ut officia. Sit irure elit esse ea nulla sunt ex occaecat reprehenderit commodo officia dolor Lorem duis laboris cupidatat officia voluptate. Culpa proident adipisicing id nulla nisi laboris ex in Lorem sunt duis officia eiusmod. Aliqua reprehenderit commodo ex non excepteur duis sunt velit enim. Voluptate laboris sint cupidatat ullamco ut ea consectetur et est culpa et culpa duis."
+		for i := 0; i < 10; i++ {
+			GameState.CountDown = 10 - i
+			time.Sleep(time.Second)
+		}
 		GameState.currentState = Game
 		sendCurrentState()
+		GameState.CountDown = 0
 		// sets current state to game and sends that updated state to users
 		// starts sending out updates of the game state
 		// TODO for loop for as long as game is going on ie more than 1 player alive
