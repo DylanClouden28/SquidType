@@ -156,6 +156,7 @@ func gameUpdateSender() {
 		if err != nil {
 			fmt.Println(err)
 		} else {
+			fmt.Println(update)
 			SendAll(js, backgroundContext)
 		}
 		time.Sleep(500 * time.Millisecond)
@@ -230,7 +231,9 @@ func GameLoop() {
 				time.Sleep(duration)
 				GameState.CurrentLight = Red
 				fmt.Println("light is now: ", GameState.CurrentLight)
-				duration = time.Duration(rand.Intn(4) + 1)
+				duration = time.Duration(rand.Intn(4)+1) * time.Second
+				time.Sleep(duration)
+				fmt.Println("waking up")
 			}
 			if isGameOver() {
 				break

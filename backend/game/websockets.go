@@ -196,6 +196,14 @@ func websocketHandler(c *gin.Context) {
 		case "pongMessage":
 			*GameState.Players = append(*GameState.Players, newPlayer)
 			continue
+		case "gameMessage":
+			var incMessage gameMessage
+			err = json.Unmarshal(rawMess, &incMessage)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			incomingMessage(incMessage, username)
 		default:
 			fmt.Println("Message type not an option")
 			continue
