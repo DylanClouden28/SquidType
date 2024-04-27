@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react"
 import goSound from '../assets/goSound.mp3'
+import lightChangeSound from '../assets/lightChange.mp3'
 import Fireworks from './FireWork'
 import deadSkull from '../assets/deadSkull.png'
 import { SendMessage } from "react-use-websocket"
@@ -165,20 +166,24 @@ const GameView: React.FC<gameViewProps> = ({gameState, setGameState, username, s
             </span></h1>
         </div>
 
-        <div className="grid grid-cols-3 w-full items-center gap-y-4 gap-x-4 h-96 overflow-y-scroll m-4">
+        <div className="grid grid-cols-3 w-full gap-y-4 gap-x-4 max-h-96 overflow-y-scroll m-4 items-start justify-end">
             {sortedPlayers.map((Player, index) => 
-                <div id={`progess_${Player.Username}`} className={index == 0 ? "flex flex-row bg-base-100 p-2 card m-0 tooltip tooltip-bottom col-span-3": "flex flex-row bg-base-100 p-2 card m-0 tooltip tooltip-bottom"} 
+                <div id={`progess_${Player.Username}`} className={index == 0 ? "flex flex-row bg-base-100 p-2 card m-0 tooltip tooltip-bottom col-span-3 " + `${Player.IsDead && "opacity-15"}` : "flex flex-row bg-base-100 p-2 card m-0 tooltip tooltip-bottom justify-start " + `${Player.IsDead && "opacity-15"}`} 
                 data-tip={
                     gameState.TargetParagraph.slice(0, gameState.TargetParagraph.length * Number(Player.CurrentPercentage) / 100)
                     } >
-                    <span>#${index}</span>
                     <div className="avatar flex flex-col h-16 w-16">
                         <div className="rounded-full">
                         <img src={`${baseUrl}/public/images/${Player.Username}.png`} alt="no profile" />
                         </div>
                     </div>
+                    
                     <div className="flex flex-col text-xl justify-center items-center mx-2 w-full">
-                        <span className={Player.Username == username ? "text-bold italic text-xl text-secondary": "text-bold text-lg"}>{Player.IsDead ? "💀 " + Player.Username : Player.Username}</span>
+                        <div className="flex flex-row justify-center w-full">
+                            <span className="pr-4 text-xl italic font-bold font-mono">#{`${index + 1}`}</span>
+                            <span className={Player.Username == username ? "text-bold italic text-xl text-secondary": "text-bold text-lg"}>{Player.IsDead ? "💀 " + Player.Username : Player.Username}</span>
+
+                        </div>
                         <progress 
                         className={Player.IsDead ? "progress progress-error w-full h-5 transition-all duration-150 ease-in-out": 
                         "progress progress-success w-full h-5 transition-all duration-150 ease-in-out"} 
@@ -196,6 +201,7 @@ const GameView: React.FC<gameViewProps> = ({gameState, setGameState, username, s
 
         {/* <button className="btn btn-primary" onClick={startCountDown}>Start CountDown</button> */}
         <audio id="gostart"><source src={goSound}></source></audio>
+        <audio id="lightChange"><source src={lightChangeSound}></source></audio>
         <div className="z-0">
             {/* <Fireworks /> */}
         </div>

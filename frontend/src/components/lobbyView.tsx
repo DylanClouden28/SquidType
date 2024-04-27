@@ -54,7 +54,7 @@ const LobbyView: React.FC<LobbyViewProps> = ({gameState, setGameState, username,
 
 
     return(
-        <div className="card bg-base-100 w-fit h-fit min-h-72">
+        <div className="card bg-base-100 w-fit min-h-72">
             <div className="flex justify-center mt-4">   
                 <div className="badge badge-ghost bold-text font-bold text-3xl italic">Game Starting in: <span className="mx-2 text-4xl not-italic text-success">
                     <span className="countdown font-mono">
@@ -63,7 +63,7 @@ const LobbyView: React.FC<LobbyViewProps> = ({gameState, setGameState, username,
                 </span>
                 </div>
             </div>
-            <div className="grid grid-cols-6 gap-4">
+            <div className="grid grid-cols-6 gap-4 max-h-[40rem] overflow-auto">
                 {gameState.Players.map(Player =>
                     <div className="flex justify-center items-center p-4 flex-col">
                     <span className={Player.Username == username ? "text-bold italic text-xl text-secondary": "text-bold text-lg"}>{Player.Username}</span>
