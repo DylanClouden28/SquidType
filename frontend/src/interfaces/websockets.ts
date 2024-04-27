@@ -54,5 +54,6 @@ export interface lobbyStateUpdate extends baseStateUpdate {
 
 export interface overAllGameUpdate extends baseWSMessage {
     players: Player[]
+    currentState: string
     currentLight: string
 }

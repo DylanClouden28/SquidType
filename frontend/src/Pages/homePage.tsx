@@ -13,6 +13,7 @@ import '../App.css'
 
 import {GameState, Player} from '../interfaces/game'
 import { baseWSMessage, ChatMessage, chatWSMessage, gameStateUpdate, lobbyStateUpdate, overAllGameUpdate, Reaction, reactionWSMessage } from '../interfaces/websockets';
+import { useGameState } from '../Components/gameContext';
 
 const CONNECTION_STATUS_CONNECTING: number = 0;
 const CONNECTION_STATUS_OPEN: number =  1;
@@ -137,14 +138,24 @@ function home(){
     const [textTimeout, setTextTimeout] = useState(false);
     const [counter, setCounter]= useState(-1);
 
+    // const [gameState, setGameState] = useState<GameState>({
+    //     Players: [],
+    //     currentRound: 0,
+    //     currentLight: 'green',
+    //     TargetParagraph: '',
+    //     currentParagraph: '',
+    //     currentState: 'lobby',
+    //     countDown: 60,
+    // })
+
     const [gameState, setGameState] = useState<GameState>({
         Players: [],
-        currentRound: 0,
         currentLight: 'green',
-        TargetParagraph: '',
-        currentParagraph: '',
+        currentRound: 0,
         currentState: 'lobby',
-        countDown: 60,
+        TargetParagraph: "",
+        currentParagraph: "",
+        countDown: 10,
     })
 
     const options = useMemo(() => ({
@@ -208,11 +219,11 @@ function home(){
         try {
             const resultJson = JSON.parse(message);
             console.log("Recieved json over websocket:", resultJson)
-            if (resultJson.messageType === undefined){
+            if (resultJson.MessageType === undefined){
                 console.log("MessageType was no defined in websocket data");
                 return
             }
-            const messageType = resultJson.messageType;
+            const messageType = resultJson.MessageType;
 
             if (messageType == "chatMessage"){
                 const chatMess: chatWSMessage = resultJson;
@@ -238,18 +249,23 @@ function home(){
                 if (resultJson.currentState === undefined){
                     return
                 }
+                if (gameState === undefined){
+                    return
+                }
                 const currentStateType = resultJson.currentState
 
                 if (currentStateType == "game"){
+                    
+
                     const newGameStateUpdate: gameStateUpdate = resultJson;
                     
                     console.log("Recevied gameUpdate")
-                    const newGameState: GameState = {
-                        ...gameState,
+                    setGameState(prevState => ({
+                        ...prevState,
                         Players: newGameStateUpdate.players,
-                        TargetParagraph: newGameStateUpdate.targetMessage
-                    }
-                    setGameState(newGameState)
+                        currentState: newGameStateUpdate.currentState,
+                        TargetParagraph: newGameStateUpdate.targetMessage,
+                    }))
                     startCountDown();
                 }
 
@@ -257,13 +273,12 @@ function home(){
                     const newGameStateUpdate: lobbyStateUpdate = resultJson;
                     
                     console.log("Recevied lobbyUpdate")
-                    const newGameState: GameState = {
-                        ...gameState,
+                    setGameState(prevState => ({
+                        ...prevState,
                         Players: newGameStateUpdate.players,
-                        TargetParagraph: newGameStateUpdate.targetMessage
-                    }
-                    setGameState(newGameState)
-                    startCountDown();
+                        currentState: newGameStateUpdate.currentState,
+                        TargetParagraph: newGameStateUpdate.targetMessage,
+                    }))
                 }
                 
             }
@@ -271,13 +286,13 @@ function home(){
             if (messageType == "gameUpdate"){
                 const newGameStateUpdate: overAllGameUpdate = resultJson;
                     
-                    console.log("Recevied gameUpdate")
-                    const newGameState: GameState = {
-                        ...gameState,
-                        Players: newGameStateUpdate.players,
-                        currentLight: newGameStateUpdate.currentLight
-                    }
-                    setGameState(newGameState)
+                console.log("Recevied gameUpdate")
+                setGameState(prevState => ({
+                    ...prevState,
+                    Players: newGameStateUpdate.players,
+                    currentLight: newGameStateUpdate.currentLight as "red" | "green" | "yellow" | "off",
+                    currentState: newGameStateUpdate.currentState as 'lobby' | 'game' | 'winner' | 'betweenRound'
+                }))
             }
         }
         catch (error){
@@ -285,6 +300,10 @@ function home(){
         }
 
     }
+
+    useEffect(() => {
+        console.log("Game State has been updated: ", gameState)
+    }, [gameState])
 
     const handleTypingMessage = useCallback(() => {
 
@@ -513,7 +532,7 @@ function home(){
             </div>
             <div className='flex'>
                 <div className='w-2/3 h-fit'>
-                    <Game gameState={gameState} setGameState={setGameState} username={username} sendMessage={sendMessage}/>
+                    {gameState &&  <Game gameState={gameState} setGameState={setGameState} username={username} sendMessage={sendMessage}/>}
                 </div>
 
                 <div className="grid justify-items-center w-1/3 h-10">
