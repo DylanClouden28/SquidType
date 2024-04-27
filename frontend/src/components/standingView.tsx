@@ -19,15 +19,15 @@ const StandingsView: React.FC<standingsViewProps> = ({gameState, setGameState, u
     })
 
     return (
-        <div className="overflow-x-auto w-fit card bg-base-100">
-            <div className="card-body">
-                <div className="flex justify-center items-center">
-                <div className="badge badge-ghost bold-text font-bold text-3xl italic">Next Round in: <span className="mx-2 text-4xl not-italic text-success">
-                    <span className="countdown font-mono font-thin">
-                        <span style={{"--value":gameState.countDown}}></span>
+        <div className="overflow-x-auto w-fit card bg-base-100 ">
+            <div className="card-body block max-h-[50rem] p-4">
+                <div className="">
+                    <div className="bold-text font-bold text-3xl italic text-center">Next Round in: <span className="mx-2 text-4xl not-italic text-success">
+                        <span className="countdown font-mono font-thin">
+                            <span style={{"--value":gameState.countDown}}></span>
+                        </span>
                     </span>
-                </span>
-                </div>
+                    </div>
 
                 </div>
 
@@ -37,9 +37,9 @@ const StandingsView: React.FC<standingsViewProps> = ({gameState, setGameState, u
                     </span></h1>
                 </div>
 
-                <table className="table">
+                <table className="table w-full">
                     {/* head */}
-                    <thead>
+                    <thead className="sticky top-0 bg-base-100 z-10">
                     <tr>
                         <th></th>
                         <th>Player</th>
@@ -47,7 +47,7 @@ const StandingsView: React.FC<standingsViewProps> = ({gameState, setGameState, u
                         <th>WPM Last Round</th>
                     </tr>
                     </thead>
-                    <tbody>
+                    <tbody className="max-h-96">
                     {/* row 1 */}
                     {gameState.Players.map((Player, index) => (
                         <tr>
@@ -55,7 +55,7 @@ const StandingsView: React.FC<standingsViewProps> = ({gameState, setGameState, u
                                 {index + 1}
                                 <div className="avatar flex flex-col h-16 w-16 p-1">
                                     <div className={Player.IsDead ? "rounded-full ring ring-error": "rounded-full ring ring-success"}>
-                                        <img src={`$${baseUrl}/public/images/${Player.Username}.png`} alt="no profile" />
+                                        <img src={`${baseUrl}/public/images/${Player.Username}.png`} alt="no profile" />
                                     </div>
                                 </div>
                             </th>

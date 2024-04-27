@@ -12,7 +12,8 @@ import Modal from '../components/Modal'
 import '../App.css'
 
 import {GameState, Player} from '../interfaces/game'
-import { baseWSMessage, ChatMessage, chatWSMessage, Reaction, reactionWSMessage } from '../interfaces/websockets';
+import { baseWSMessage, ChatMessage, chatWSMessage, gameStateUpdate, lobbyStateUpdate, overAllGameUpdate, Reaction, reactionWSMessage } from '../interfaces/websockets';
+import { useGameState } from '../Components/gameContext';
 
 const CONNECTION_STATUS_CONNECTING: number = 0;
 const CONNECTION_STATUS_OPEN: number =  1;
@@ -21,56 +22,104 @@ const CONNECTION_STATUS_CLOSED: number  = 3;
 
 const enablePolling = false;
 
-const mockPlayers: Player[] = [
-    {
-        Username: "Dylan",
-        IsDead: true,
-        CurrentPercentage: "90",
-        isReady: false,
-        WPM: 40,
-        lastRoundWPM: 50,
-    },
-    {
-        Username: "Steve",
-        IsDead: false,
-        CurrentPercentage: "40",
-        isReady: false,
-        WPM: 50,
-        lastRoundWPM: 70,
-    },
-    {
-        Username: "Steve",
-        IsDead: false,
-        CurrentPercentage: "50",
-        isReady: false,
-        WPM: 60,
-        lastRoundWPM: 50,
-    },
-    {
-        Username: "Steve",
-        IsDead: false,
-        CurrentPercentage: "30",
-        isReady: false,
-        WPM: 70,
-        lastRoundWPM: 30,
-    },
-    {
-        Username: "Steve",
-        IsDead: false,
-        CurrentPercentage: "30",
-        isReady: false,
-        WPM: 80,
-        lastRoundWPM: 20,
-    },
-    {
-        Username: "Steve",
-        IsDead: false,
-        CurrentPercentage: "30",
-        isReady: false,
-        WPM: 90,
-        lastRoundWPM: 10,
-    },
-]
+// const mockPlayers: Player[] = [
+//     {
+//         Username: "Dylan",
+//         IsDead: true,
+//         CurrentPercentage: "90",
+//         isReady: false,
+//         WPM: 40,
+//         lastRoundWPM: 50,
+//     },
+//     {
+//         Username: "Joe",
+//         IsDead: false,
+//         CurrentPercentage: "70",
+//         isReady: false,
+//         WPM: 50,
+//         lastRoundWPM: 70,
+//     },
+//     {
+//         Username: "Steve",
+//         IsDead: false,
+//         CurrentPercentage: "56",
+//         isReady: false,
+//         WPM: 60,
+//         lastRoundWPM: 50,
+//     },
+//     {
+//         Username: "Steve",
+//         IsDead: false,
+//         CurrentPercentage: "34",
+//         isReady: false,
+//         WPM: 70,
+//         lastRoundWPM: 30,
+//     },
+//     {
+//         Username: "Steve",
+//         IsDead: false,
+//         CurrentPercentage: "33",
+//         isReady: false,
+//         WPM: 80,
+//         lastRoundWPM: 20,
+//     },
+//     {
+//         Username: "Bottom",
+//         IsDead: false,
+//         CurrentPercentage: "20",
+//         isReady: false,
+//         WPM: 90,
+//         lastRoundWPM: 10,
+//     },
+//     {
+//         Username: "Steve",
+//         IsDead: false,
+//         CurrentPercentage: "10",
+//         isReady: false,
+//         WPM: 70,
+//         lastRoundWPM: 30,
+//     },
+//     {
+//         Username: "Steve",
+//         IsDead: false,
+//         CurrentPercentage: "5",
+//         isReady: false,
+//         WPM: 80,
+//         lastRoundWPM: 20,
+//     },
+//     {
+//         Username: "Bottom",
+//         IsDead: false,
+//         CurrentPercentage: "67",
+//         isReady: false,
+//         WPM: 90,
+//         lastRoundWPM: 10,
+//     },
+//     {
+//         Username: "Steve",
+//         IsDead: false,
+//         CurrentPercentage: "7",
+//         isReady: false,
+//         WPM: 70,
+//         lastRoundWPM: 30,
+//     },
+//     {
+//         Username: "Steve",
+//         IsDead: false,
+//         CurrentPercentage: "80",
+//         isReady: false,
+//         WPM: 80,
+//         lastRoundWPM: 20,
+//     },
+//     {
+//         Username: "Bottom",
+//         IsDead: false,
+//         CurrentPercentage: "45",
+//         isReady: false,
+//         WPM: 90,
+//         lastRoundWPM: 10,
+//     },
+// ]
 
 function home(){
     const baseUrl: string = import.meta.env.VITE_Backend_URL
@@ -85,15 +134,28 @@ function home(){
     const [finalImage, setFinalImage] = useState("");
     const [cropData, setCropData] = useState("");
     const [lastMess, setLastMess] = useState<ChatMessage | undefined>(undefined);
+    const [textError, setTextError] = useState<undefined | string>(undefined);
+    const [textTimeout, setTextTimeout] = useState(false);
+    const [counter, setCounter]= useState(-1);
+
+    // const [gameState, setGameState] = useState<GameState>({
+    //     Players: [],
+    //     currentRound: 0,
+    //     currentLight: 'green',
+    //     TargetParagraph: '',
+    //     currentParagraph: '',
+    //     currentState: 'lobby',
+    //     countDown: 60,
+    // })
 
     const [gameState, setGameState] = useState<GameState>({
-        Players: mockPlayers,
-        currentRound: 0,
+        Players: [],
         currentLight: 'green',
-        TargetParagraph: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
-        currentParagraph: '',
-        currentState: 'game',
-        countDown: 60,
+        currentRound: 0,
+        currentState: 'lobby',
+        TargetParagraph: "",
+        currentParagraph: "",
+        countDown: 10,
     })
 
     const options = useMemo(() => ({
@@ -157,11 +219,11 @@ function home(){
         try {
             const resultJson = JSON.parse(message);
             console.log("Recieved json over websocket:", resultJson)
-            if (resultJson.messageType === undefined){
+            if (resultJson.MessageType === undefined){
                 console.log("MessageType was no defined in websocket data");
                 return
             }
-            const messageType = resultJson.messageType;
+            const messageType = resultJson.MessageType;
 
             if (messageType == "chatMessage"){
                 const chatMess: chatWSMessage = resultJson;
@@ -175,23 +237,75 @@ function home(){
                 addNewReaction(reactionMess.data.reaction)
             }
 
-            // if (messageType == "roundStart"){
-            //     console.log("Recvied roundStart")
-            // }
+            if (messageType == "pingMessage"){
+                const Pong: baseWSMessage = {
+                    messageType: "pongMessage"
+                }
+                sendMessage(JSON.stringify(Pong));
+            }
 
-            // if (messageType == "gameUpdate"){
-            //     console.log("Recevied gameUpdate")
-            //     const newGameState: GameState = {
-            //         Players: resultJson?.Players,
-            //         currentRound: resultJson?.currentRound,
-            //         currentLight: resultJson?.currentLight,
-            //         TargetParagraph: resultJson?.TargetMessage,
-            //         currentParagraph: gameState.currentParagraph,
-            //         currentState: resultJson?.currentState,
-            //         countDown: resultJson?.countDown,
-            //     }
-            //     setGameState(newGameState)
-            // }
+
+            if (messageType == "stateUpdate"){
+                if (resultJson.currentState === undefined){
+                    return
+                }
+                if (gameState === undefined){
+                    return
+                }
+                const currentStateType = resultJson.currentState
+
+                if (currentStateType == "game"){
+                    
+
+                    const newGameStateUpdate: gameStateUpdate = resultJson;
+                    
+                    console.log("Recevied gameUpdate")
+                    setGameState(prevState => ({
+                        ...prevState,
+                        Players: newGameStateUpdate.players,
+                        currentState: newGameStateUpdate.currentState,
+                        TargetParagraph: newGameStateUpdate.targetMessage,
+                    }))
+                    startCountDown();
+                }
+
+                if (currentStateType == "lobby"){
+                    const newGameStateUpdate: lobbyStateUpdate = resultJson;
+                    
+                    console.log("Recevied lobbyUpdate")
+                    setGameState(prevState => ({
+                        ...prevState,
+                        Players: newGameStateUpdate.players,
+                        currentState: newGameStateUpdate.currentState,
+                        TargetParagraph: newGameStateUpdate.targetMessage,
+                    }))
+                }
+
+                if (currentStateType == "winner"){
+                    const newGameStateUpdate: lobbyStateUpdate = resultJson;
+                    
+                    console.log("Recevied lobbyUpdate")
+                    setGameState(prevState => ({
+                        ...prevState,
+                        Players: newGameStateUpdate.players,
+                        currentState: "winner",
+                        TargetParagraph: newGameStateUpdate.targetMessage,
+                    }))
+                }
+                
+            }
+
+            if (messageType == "gameUpdate"){
+                const newGameStateUpdate: overAllGameUpdate = resultJson;
+                    
+                console.log("Recevied gameUpdate")
+                setGameState(prevState => ({
+                    ...prevState,
+                    Players: newGameStateUpdate.players,
+                    currentLight: newGameStateUpdate.currentLight as "red" | "green" | "yellow" | "off",
+                    currentState: newGameStateUpdate.currentState as 'lobby' | 'game' | 'winner' | 'betweenRound'
+                }))
+            }
         }
         catch (error){
             console.log("Error handling new websocket message", error)
@@ -199,16 +313,10 @@ function home(){
 
     }
 
-    const handleTypingMessage = useCallback(() => {
-        const message = JSON.stringify({
-            messageType: 'input',
-            text: gameState?.currentParagraph
-        })
-        sendMessage(message);
-    }, []);
-
-    
-    
+    useEffect(() => {
+        console.log("Game State has been updated: ", gameState)
+    }, [gameState])
+        
     const nav = useNavigate();
 
     // const [isModalOpen, setIsModalOpen] = useState(false);
@@ -308,6 +416,15 @@ function home(){
             if (message == ''){
                 return
             }
+            setTextError(undefined);
+            if (textTimeout === true){
+                setTextError("Please wait a second before sending a message");
+                return 
+            }
+            if (message.length > 100){
+                setTextError("Please send a message under 100 characters");
+                return
+            }
             const messData = JSON.stringify({
                 "messageType": "chatMessage",
                 "Data": {
@@ -318,6 +435,10 @@ function home(){
             })
             sendMessage(messData);
             setMessageInput('')
+            setTextTimeout(true);
+            setTimeout(() => {
+                setTextTimeout(false);
+            }, 3000);
             
         } catch (error){
             console.log(error)
@@ -374,37 +495,56 @@ function home(){
         return LiterallyHim;
     }
 
+    const startCountDown = () => {
+        setCounter(10);
+    
+        const id = setInterval(() => {
+            setCounter((prevCount) => {
+                if (prevCount === 4){
+                    document.getElementById("gostart").play();
+                }
+                if (prevCount === -1){
+                    clearInterval(id)
+                }
+                if (prevCount === 0){
+                    document.getElementById("game-input")?.focus()
+                }
+                return prevCount - 1;
+            })
+        }, 1000) 
+    }
+
     console.log("PAGE REFRESHING")
 
     return(
-        <div className="p-4 bg-base-300 min-h-screen" data-theme="night">
-            <div className="navbar bg-base-100 rounded-box shadow-xl mb-10 p-4">
-            <div className="navbar-start">
+        <div className="bg-base-300 min-h-screen" data-theme="night">
+            <div className="w-48 fixed m-4">
                 {/* <p className='font-Consolas'><span className='text-error text-bold px-2 text-4xl '>SQUID </span><span className='text-bold text-4xl'> TYPE</span></p> */}
-                <img className='ml-4 w-32'src={Logo} alt="SquidType"></img>
+                <img className='ml-4 w-24'src={Logo} alt="SquidType"></img>
             </div>
-            <div className="navbar-end">
-                <h1 className='text-2xl px-4'>{username}</h1>
-                <div className="avatar">
-                    <div className="rounded-full mr-2 w-14 h-14">
-                    <img
-                        className="p-0"
-                        src={getImageSrc()}
-                    />
-                    </div>
-                </div>
-                <Modal cropData={cropData} setCropData={setCropData} setFinalImage={setFinalImage} finalImage={finalImage}/>
-                <button className='btn btn-neutral' onClick={signOut}>Signout</button>
-                {/* <button className='btn btn-neutral' onClick={openModal}>Open Modal</button> */}
-            </div>
-            </div>
-
             <div className='flex'>
                 <div className='w-2/3 h-fit'>
-                    <Game gameState={gameState} setGameState={setGameState} username={username}/>
+                    {gameState &&  <Game gameState={gameState} setGameState={setGameState} username={username} sendMessage={sendMessage}/>}
                 </div>
 
                 <div className="grid justify-items-center w-1/3 h-10">
+                    <div className="navbar bg-base-100 rounded-box shadow-xl mb-10 p-10 justify-end w-5/6 m-4">
+                        <div className="">
+                            <h1 className='text-2xl px-4'>{username}</h1>
+                            <div className="avatar">
+                                <div className="rounded-full mr-2 w-14 h-14">
+                                <img
+                                    className="p-0"
+                                    src={getImageSrc()}
+                                />
+                                </div>
+                            </div>
+                            <Modal cropData={cropData} setCropData={setCropData} setFinalImage={setFinalImage} finalImage={finalImage}/>
+                            <button className='btn btn-neutral' onClick={signOut}>Signout</button>
+                            {/* <button className='btn btn-neutral' onClick={openModal}>Open Modal</button> */}
+                        </div>
+                    </div>
+
                     {isHelp && 
                     <div role="alert" className="alert alert-info max-w-2xl mb-5">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -430,7 +570,7 @@ function home(){
                                     {message?.user}
                                     <time className="text-xs opacity-50 mx-1">{new Date(message?.date)?.toLocaleString("en-US", {hour: "2-digit", minute: "2-digit"})}</time>
                                     </div>
-                                    <div className="chat-bubble hover:bg-base-100" id={message.uuid} role="button" onClick={() => {
+                                    <div className="chat-bubble hover:bg-base-100 max-w-96 text-clip overflow-hidden" id={message.uuid} role="button" onClick={() => {
                                         setEmojiDropDown(!isEmojiDropDown);
                                         console.log("setting emoji to message uuid of ", message.uuid)
                                         setCurrentMessage(message?.uuid);
@@ -450,14 +590,15 @@ function home(){
                                 )}
                         </div>
 
-                        <div className="card-body p-2">
+                        <div className={textError ? "card-body p-2 tooltip tooltip-open tooltip-accent" : "card-body p-2"} data-tip={textError} >
                             <div className="flex">
                                 <input onKeyDown={e => {
                                     if (e.key == "Enter"){
                                         sendTextMessage(messageInput)
                                     }
                                 }} 
-                                className="input max-sm:input-sm input-bordered flex-grow mx-2" placeholder="Type here" value={messageInput} type="text" onChange={e => {setMessageInput(e.target.value)}}/>
+                                className="input max-sm:input-sm input-bordered flex-grow mx-2 "
+                                placeholder="Type here" value={messageInput} type="text" onChange={e => {setMessageInput(e.target.value)}}/>
                                 <img onClick={() => {sendTextMessage(messageInput)}} className="btn max-sm:btn-sm btn-accent p-2" src={sendIcon}></img>
                             </div>
                         </div>
@@ -473,6 +614,16 @@ function home(){
                     </div>
                 </div>
                 </div>
+                {counter > -1 &&
+        
+                    <div className="inset-0 z-10 fixed flex items-center justify-center p-4">
+                        <p className="text-9xl font-bold bg-base-300"></p>
+                        <span className="countdown">
+                        <span className="text-9xl" style={{"--value":counter}}></span>
+                        </span>
+                    </div>
+                
+                }
 
             </div>
 

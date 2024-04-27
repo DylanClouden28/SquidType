@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sluggers/controller"
+	//"sluggers/database"
 	"sluggers/models"
 
 	"context"
@@ -42,6 +43,24 @@ type reactionMessage struct {
 	} `json:"data"`
 }
 
+type readyMessage struct {
+	MessageType string `json:"messageType"`
+	Data        struct {
+		IsReady bool `json:"isReady"`
+	}
+}
+
+type gameMessage struct {
+	MessageType string `json:"messageType"`
+	Data        struct {
+		Typed string `json:"typed"`
+	}
+}
+
+type pongMessage struct {
+	MessageType string `json:"messageType"`
+}
+
 func Route(router *gin.Engine) {
 	game := router.Group("/api/ws")
 	{
@@ -73,12 +92,27 @@ func websocketHandler(c *gin.Context) {
 	defer func() {
 		Clients = removeFromSlice(Clients, conn)
 		conn.Close(websocket.StatusNormalClosure, "bye bye")
+		if GameState.currentState == Lobby {
+			size := len(*GameState.Players)
+			for i := 0; i < size; i++ {
+				if (*GameState.Players)[i].Username == username {
+					(*GameState.Players)[i] = (*GameState.Players)[size-1]
+					*GameState.Players = (*GameState.Players)[:size-1]
+				}
+			}
+		}
 	}()
+	newPlayer := player{Username: username}
+	if GameState.currentState == Lobby {
+		*GameState.Players = append(*GameState.Players, newPlayer)
+	}
+	sendCurrentState()
 
 	for {
 		var rawMess json.RawMessage
 		err := wsjson.Read(context, conn, &rawMess)
 		if err != nil {
+			fmt.Println(err)
 			break
 		}
 
@@ -88,7 +122,7 @@ func websocketHandler(c *gin.Context) {
 			fmt.Println("Error did not find messageType in rawMessage: ", string(rawMess))
 			continue
 		}
-		fmt.Println("Recieved baseMess | type: ", baseMess.MessageType, " | rawJson: ", rawMess)
+		//fmt.Println("Recieved baseMess | type: ", baseMess.MessageType, " | rawJson: ", rawMess)
 
 		switch baseMess.MessageType {
 		case "yoyo":
@@ -112,6 +146,9 @@ func websocketHandler(c *gin.Context) {
 				fmt.Println("Error Unmarshiling Error: ", err)
 				continue
 			}
+			if len(chatMess.Data.Message.Content) > 100 {
+				continue
+			}
 			newMessage := messages.SendMessage(username, chatMess.Data.Message.Content)
 			chatMess.Data.Message.ID = newMessage.ID
 			chatMess.Data.Message.Date = newMessage.Date
@@ -123,7 +160,7 @@ func websocketHandler(c *gin.Context) {
 				fmt.Println(err)
 				continue
 			}
-			sendAll(js, context)
+			SendAll(js, context)
 			continue
 		case "reactionMessage":
 			var emoji reactionMessage
@@ -139,8 +176,34 @@ func websocketHandler(c *gin.Context) {
 			if err != nil {
 				fmt.Println(err)
 			}
-			sendAll(js, context)
+			SendAll(js, context)
 			continue
+		case "readyMessage":
+			var ready readyMessage
+			err = json.Unmarshal(rawMess, &ready)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			fmt.Println(len(*GameState.Players))
+			for i := 0; i < len(*GameState.Players); i++ {
+				if (*GameState.Players)[i].Username == username {
+					(*GameState.Players)[i].IsReady = ready.Data.IsReady
+				}
+			}
+			IsGameReady()
+			continue
+		case "pongMessage":
+			*GameState.Players = append(*GameState.Players, newPlayer)
+			continue
+		case "gameMessage":
+			var incMessage gameMessage
+			err = json.Unmarshal(rawMess, &incMessage)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			incomingMessage(incMessage, username)
 		default:
 			fmt.Println("Message type not an option")
 			continue
@@ -158,7 +221,7 @@ func removeFromSlice(clients []*websocket.Conn, conn *websocket.Conn) []*websock
 	return clients
 }
 
-func sendAll(json []byte, context context.Context) {
+func SendAll(json []byte, context context.Context) {
 	for i := 0; i < len(Clients); i++ {
 		err := Clients[i].Write(context, websocket.MessageText, json)
 		if err != nil {
