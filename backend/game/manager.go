@@ -40,6 +40,8 @@ type gameState struct {
 	PreviousLightEnd time.Time
 	TargetMessage    string
 	currentState     int
+	DeadRound        int
+	DeadTarget       int
 	Rank             int
 	Lock             sync.Mutex
 	Cond             *sync.Cond
@@ -79,6 +81,7 @@ func incomingMessage(mess gameMessage, username string) {
 		(*GameState.Players)[j].IsDead = true
 		(*GameState.Players)[j].Rank = GameState.Rank
 		GameState.Rank += 1
+		GameState.DeadRound += 1
 		roundOverCheck()
 		return
 	}
@@ -171,14 +174,25 @@ func roundOverCheck() {
 	// call every time player dies
 	// set isRoundOver to true if round should end
 	// TODO implement func
+	// DeadRound is how many have died this round
+	// Dead Target is how many need to die for the round to end
+	// if DeadTarget is 0 then the round ends when the game does
+	if GameState.DeadRound >= GameState.DeadTarget {
+		*isRoundOver = true
+	}
+
 }
 
 func isGameOver() bool {
 	// returns true if there is 1 player alive
 	// otherwise false
+	winner := false
 	for i := 0; i < len(*GameState.Players); i++ {
 		if !(*GameState.Players)[i].IsDead {
-			return false
+			if winner {
+				return false
+			}
+			winner = true
 		}
 	}
 	return true
@@ -220,6 +234,17 @@ func GameLoop() {
 		//
 		time.Sleep(time.Second * 10)
 		for !isGameOver() {
+			GameState.DeadRound = 0
+			GameState.DeadTarget = 0
+			alive := 0
+			for i := 0; i < len(*GameState.Players); i++ {
+				if !(*GameState.Players)[i].IsDead {
+					alive++
+				}
+			}
+			if alive > 3 {
+				GameState.DeadTarget = ((alive - 1) / 2) + 1
+			}
 			// runs as long as game is not over
 			for !(*isRoundOver) && !isGameOver() {
 				GameState.CurrentLight = Green
@@ -241,12 +266,14 @@ func GameLoop() {
 			if isGameOver() {
 				break
 			}
+			// following code only runs when the round is over
+			// but the game is not
 			GameState.currentState = BetweenRound
 			sendCurrentState()
 			for i := 0; i < len(*GameState.Players); i++ {
 				(*GameState.Players)[i].CurrentPercentage = 0.0
 			}
-			time.Sleep(time.Second * 30)
+			time.Sleep(time.Second * 10)
 			GameState.currentState = Game
 			GameState.TargetMessage = "New Message Here"
 			sendCurrentState()
