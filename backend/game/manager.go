@@ -71,7 +71,11 @@ func incomingMessage(mess gameMessage, username string) {
 	if (*GameState.Players)[j].IsDead == true {
 		return
 	}
-	if GameState.CurrentLight == Red && !GameState.PreviousLightEnd.Before(time.Now().Add(time.Millisecond*100)) {
+	if GameState.CurrentLight == Red {
+		fmt.Println("light is red, user typed in", GameState.PreviousLightEnd.Before(time.Now().Add(time.Millisecond*200)))
+		fmt.Println(GameState.PreviousLightEnd, time.Now())
+	}
+	if GameState.CurrentLight == Red && GameState.PreviousLightEnd.Before(time.Now().Add(-time.Millisecond*200)) {
 		(*GameState.Players)[j].IsDead = true
 		(*GameState.Players)[j].Rank = GameState.Rank
 		GameState.Rank += 1
@@ -156,7 +160,6 @@ func gameUpdateSender() {
 		if err != nil {
 			fmt.Println(err)
 		} else {
-			fmt.Println(update)
 			SendAll(js, backgroundContext)
 		}
 		time.Sleep(500 * time.Millisecond)
@@ -251,7 +254,6 @@ func GameLoop() {
 			*isRoundOver = false
 		}
 		GameState.currentState = Winner
-		sendCurrentState()
 		time.Sleep(time.Second * 10)
 		*GameState.Players = make([]player, 0)
 		// TODO set all playesr back to not ready

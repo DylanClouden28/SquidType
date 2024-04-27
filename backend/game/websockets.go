@@ -122,7 +122,7 @@ func websocketHandler(c *gin.Context) {
 			fmt.Println("Error did not find messageType in rawMessage: ", string(rawMess))
 			continue
 		}
-		fmt.Println("Recieved baseMess | type: ", baseMess.MessageType, " | rawJson: ", rawMess)
+		//fmt.Println("Recieved baseMess | type: ", baseMess.MessageType, " | rawJson: ", rawMess)
 
 		switch baseMess.MessageType {
 		case "yoyo":
