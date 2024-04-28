@@ -171,7 +171,7 @@ func gameUpdateSender() {
 		}
 		update := gameUpdate{MessageType: "gameUpdate", Players: GameState.Players, CurrentLight: light, CurrentState: state, CountDown: GameState.CountDown}
 		for i := 0; i < len(*update.Players); i++ {
-			if (*update.Players)[i].CurrentPercentage < .999999999 {
+			if (*update.Players)[i].CurrentPercentage > .999999999 {
 				(*update.Players)[i].isDone = true
 			} else if !(*update.Players)[i].IsDead {
 				words := (*update.Players)[i].CurrentPercentage * paragraphLen / 5.0
@@ -244,6 +244,10 @@ func GameLoop() {
 	GameState.currentState = Lobby
 	go gameUpdateSender()
 	for {
+		GameState.CurrentLight = 0
+		GameState.PreviousLightEnd = time.Time{}
+		GameState.RoundDuration = 0
+		GameState.CurrentLightStart = time.Time{}
 		GameState.DeadRound = 0
 		GameState.DeadTarget = 0
 		GameState.Round = 0
@@ -256,6 +260,7 @@ func GameLoop() {
 			GameState.CountDown = 10 - i
 			time.Sleep(time.Second)
 		}
+		time.Sleep(time.Second / 2)
 		GameState.currentState = Game
 		sendCurrentState()
 		GameState.CountDown = 0
@@ -322,7 +327,11 @@ func GameLoop() {
 			GameState.currentState = Game
 			GameState.TargetMessage = "New Message Here"
 			sendCurrentState()
-			time.Sleep(time.Second * 10)
+			for i := 0; i < 10; i++ {
+				GameState.CountDown = 10 - i
+				time.Sleep(time.Second)
+			}
+			time.Sleep(time.Second / 2)
 			*isRoundOver = false
 		}
 		GameState.currentState = Winner
