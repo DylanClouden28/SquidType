@@ -19,7 +19,9 @@ const StandingsView: React.FC<standingsViewProps> = ({gameState, setGameState, u
     })
     let alivePlayers: Player[] = []
     let deadPlayers: Player[] = []
-    gameState.Players.forEach(Player => {
+    gameState.Players.sort((a,b) =>{
+        return Number(b.WPM) - Number(a.WPM)
+    }).forEach(Player => {
         if(Player.IsDead){
             deadPlayers.push(Player)
         }
@@ -62,19 +64,19 @@ const StandingsView: React.FC<standingsViewProps> = ({gameState, setGameState, u
                             {/* row 1 */}
                             {alivePlayers.map((Player, index) => (
                                 <tr>
-                                    <th className="flex flex-row gap-4 justify-center items-center">
+                                    <td className="flex flex-row gap-4 justify-center items-center">
                                         {index + 1}
                                         <div className="avatar flex flex-col h-16 w-16 p-1">
                                             <div className={Player.IsDead ? "rounded-full ring ring-error": "rounded-full ring ring-success"}>
                                                 <img src={`${baseUrl}/public/images/${Player.Username}.png`} alt="no profile" />
                                             </div>
                                         </div>
-                                    </th>
+                                    </td>
                                     <td>
                                         <span className={Player.Username == username ? "text-bold text-lg": "text-bold text-xl text-secondary"}>{Player.IsDead ? "💀 " + Player.Username : Player.Username}</span>
                                     </td>
                                     <td>{Player.IsDead ? "Is dead because they suck":"Is a stupid loser"}</td>
-                                    <td>{Player.lastRoundWPM}</td>
+                                    <td>{Player.WPM}</td>
                                 </tr>
                             ))}
                             </tbody>
@@ -102,19 +104,19 @@ const StandingsView: React.FC<standingsViewProps> = ({gameState, setGameState, u
                             {/* row 1 */}
                             {deadPlayers.map((Player, index) => (
                                 <tr>
-                                    <th className="flex flex-row gap-4 justify-center items-center">
+                                    <td className="flex flex-row gap-4 justify-center items-center">
                                         {index + 1}
                                         <div className="avatar flex flex-col h-16 w-16 p-1">
                                             <div className={Player.IsDead ? "rounded-full ring ring-error": "rounded-full ring ring-success"}>
                                                 <img src={`${baseUrl}/public/images/${Player.Username}.png`} alt="no profile" />
                                             </div>
                                         </div>
-                                    </th>
+                                    </td>
                                     <td>
                                         <span className={Player.Username == username ? "text-bold text-lg": "text-bold text-xl text-secondary"}>{Player.IsDead ? "💀 " + Player.Username : Player.Username}</span>
                                     </td>
                                     <td>{Player.IsDead ? "Is dead because they suck":"Is a stupid loser"}</td>
-                                    <td>{Player.lastRoundWPM}</td>
+                                    <td>{Player.WPM}</td>
                                 </tr>
                             ))}
                             </tbody>

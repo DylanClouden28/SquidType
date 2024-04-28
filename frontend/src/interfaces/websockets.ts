@@ -56,4 +56,5 @@ export interface overAllGameUpdate extends baseWSMessage {
     players: Player[]
     currentState: string
     currentLight: string
+    countDown: number
 }

@@ -18,6 +18,7 @@ type player struct {
 	Rank              int
 	isConn            bool
 	WPM               int32
+	isDone            bool
 }
 
 const (
@@ -56,7 +57,7 @@ type gameUpdate struct {
 	CurrentLight string    `json:"currentLight"`
 	MessageType  string    `json:"MessageType"`
 	CurrentState string    `json:"currentState"`
-	countDown    int
+	CountDown    int       `json:"countDown"`
 }
 
 type stateUpdate struct {
@@ -168,9 +169,11 @@ func gameUpdateSender() {
 		case BetweenRound:
 			state = "betweenRound"
 		}
-		update := gameUpdate{MessageType: "gameUpdate", Players: GameState.Players, CurrentLight: light, CurrentState: state, countDown: GameState.CountDown}
+		update := gameUpdate{MessageType: "gameUpdate", Players: GameState.Players, CurrentLight: light, CurrentState: state, CountDown: GameState.CountDown}
 		for i := 0; i < len(*update.Players); i++ {
-			if (*update.Players)[i].CurrentPercentage < .999999999 && !(*update.Players)[i].IsDead {
+			if (*update.Players)[i].CurrentPercentage > .999999999 {
+				(*update.Players)[i].isDone = true
+			} else if !(*update.Players)[i].IsDead {
 				words := (*update.Players)[i].CurrentPercentage * paragraphLen / 5.0
 				wpm := words / duration.Minutes()
 				(*update.Players)[i].WPM = int32(wpm)
@@ -197,6 +200,15 @@ func roundOverCheck() {
 	if GameState.DeadRound >= GameState.DeadTarget {
 		*isRoundOver = true
 	}
+	c := 0
+	for i := 0; i < len(*GameState.Players); i++ {
+		if (*GameState.Players)[i].isDone {
+			c++
+		}
+	}
+	if c >= GameState.DeadTarget {
+		*isRoundOver = true
+	}
 
 }
 
@@ -204,14 +216,17 @@ func isGameOver() bool {
 	// returns true if there is 1 player alive
 	// otherwise false
 	winner := false
+	winning_player := 0
 	for i := 0; i < len(*GameState.Players); i++ {
 		if !(*GameState.Players)[i].IsDead {
 			if winner {
 				return false
 			}
+			winning_player = i
 			winner = true
 		}
 	}
+	(*GameState.Players)[winning_player].Rank = GameState.Rank
 	return true
 }
 
@@ -229,8 +244,13 @@ func GameLoop() {
 	GameState.currentState = Lobby
 	go gameUpdateSender()
 	for {
+		GameState.CurrentLight = 0
+		GameState.PreviousLightEnd = time.Time{}
+		GameState.RoundDuration = 0
+		GameState.CurrentLightStart = time.Time{}
 		GameState.DeadRound = 0
 		GameState.DeadTarget = 0
+		GameState.Round = 0
 		<-playersReady
 		// TODO remove any pleyers from slice that are not connected
 		fmt.Println("players ready; starting game")
@@ -238,8 +258,9 @@ func GameLoop() {
 		GameState.TargetMessage = "Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore culpa sint ad nisi Lorem pariatur mollit ex esse exercitation amet. Nisi anim cupidatat excepteur officia. Reprehenderit nostrud nostrud ipsum Lorem est aliquip amet voluptate voluptate dolor minim nulla est proident. Nostrud officia pariatur ut officia. Sit irure elit esse ea nulla sunt ex occaecat reprehenderit commodo officia dolor Lorem duis laboris cupidatat officia voluptate. Culpa proident adipisicing id nulla nisi laboris ex in Lorem sunt duis officia eiusmod. Aliqua reprehenderit commodo ex non excepteur duis sunt velit enim. Voluptate laboris sint cupidatat ullamco ut ea consectetur et est culpa et culpa duis."
 		for i := 0; i < 10; i++ {
 			GameState.CountDown = 10 - i
-			//time.Sleep(time.Second)
+			time.Sleep(time.Second)
 		}
+		time.Sleep(time.Second / 2)
 		GameState.currentState = Game
 		sendCurrentState()
 		GameState.CountDown = 0
@@ -306,7 +327,11 @@ func GameLoop() {
 			GameState.currentState = Game
 			GameState.TargetMessage = "New Message Here"
 			sendCurrentState()
-			time.Sleep(time.Second * 10)
+			for i := 0; i < 10; i++ {
+				GameState.CountDown = 10 - i
+				time.Sleep(time.Second)
+			}
+			time.Sleep(time.Second / 2)
 			*isRoundOver = false
 		}
 		GameState.currentState = Winner

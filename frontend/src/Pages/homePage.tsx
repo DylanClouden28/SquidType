@@ -23,6 +23,60 @@ const CONNECTION_STATUS_CLOSED: number  = 3;
 const enablePolling = false;
 
 const mockPlayers: Player[] = [
+    // {
+    //     Username: "Winner",
+    //     IsDead: true,
+    //     CurrentPercentage: "90",
+    //     isReady: false,
+    //     WPM: 40,
+    //     lastRoundWPM: 50,
+    //     Rank: 10,
+    // },
+    // {
+    //     Username: "Second",
+    //     IsDead: false,
+    //     CurrentPercentage: "40",
+    //     isReady: false,
+    //     WPM: 50,
+    //     lastRoundWPM: 70,
+    //     Rank: 9,
+    // },
+    // {
+    //     Username: "Third",
+    //     IsDead: false,
+    //     CurrentPercentage: "50",
+    //     isReady: false,
+    //     WPM: 60,
+    //     lastRoundWPM: 50,
+    //     Rank: 8,
+    // },
+    // {
+    //     Username: "Steve",
+    //     IsDead: false,
+    //     CurrentPercentage: "30",
+    //     isReady: false,
+    //     WPM: 70,
+    //     lastRoundWPM: 30,
+    //     Rank: 7,
+    // },
+    // {
+    //     Username: "Steve",
+    //     IsDead: false,
+    //     CurrentPercentage: "30",
+    //     isReady: false,
+    //     WPM: 80,
+    //     lastRoundWPM: 20,
+    //     Rank: 7,
+    // },
+    // {
+    //     Username: "Steve",
+    //     IsDead: false,
+    //     CurrentPercentage: "30",
+    //     isReady: false,
+    //     WPM: 90,
+    //     lastRoundWPM: 10,
+    //     Rank: 7,
+    // },
 ]
 
 function home(){
@@ -214,7 +268,8 @@ function home(){
                         ...prevState,
                         Players: newGameStateUpdate.players,
                         currentLight: newGameStateUpdate.currentLight as "red" | "green" | "yellow" | "off",
-                        currentState: newGameStateUpdate.currentState as 'lobby' | 'game' | 'winner' | 'betweenRound'
+                        currentState: newGameStateUpdate.currentState as 'lobby' | 'game' | 'winner' | 'betweenRound',
+                        countDown: newGameStateUpdate.countDown
                     }
             })
             }
@@ -445,7 +500,8 @@ function home(){
             </div>
             <div className='flex'>
                 <div className='w-2/3 h-fit'>
-                    {gameState && readyState == CONNECTION_STATUS_OPEN  &&  <Game gameState={gameState} setGameState={setGameState} username={username} sendMessage={sendMessage}/>}
+                    {/* //&& readyState == CONNECTION_STATUS_OPEN  &&   */}
+                    {gameState && readyState == CONNECTION_STATUS_OPEN  &&<Game gameState={gameState} setGameState={setGameState} username={username} sendMessage={sendMessage}/>}
                 </div>
 
                 <div className="grid justify-items-center w-1/3 h-10">
