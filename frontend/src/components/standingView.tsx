@@ -19,7 +19,9 @@ const StandingsView: React.FC<standingsViewProps> = ({gameState, setGameState, u
     })
     let alivePlayers: Player[] = []
     let deadPlayers: Player[] = []
-    gameState.Players.forEach(Player => {
+    gameState.Players.sort((a,b) =>{
+        return Number(b.WPM) - Number(a.WPM)
+    }).forEach(Player => {
         if(Player.IsDead){
             deadPlayers.push(Player)
         }
@@ -74,7 +76,7 @@ const StandingsView: React.FC<standingsViewProps> = ({gameState, setGameState, u
                                         <span className={Player.Username == username ? "text-bold text-lg": "text-bold text-xl text-secondary"}>{Player.IsDead ? "💀 " + Player.Username : Player.Username}</span>
                                     </td>
                                     <td>{Player.IsDead ? "Is dead because they suck":"Is a stupid loser"}</td>
-                                    <td>{Player.lastRoundWPM}</td>
+                                    <td>{Player.WPM}</td>
                                 </tr>
                             ))}
                             </tbody>
@@ -114,7 +116,7 @@ const StandingsView: React.FC<standingsViewProps> = ({gameState, setGameState, u
                                         <span className={Player.Username == username ? "text-bold text-lg": "text-bold text-xl text-secondary"}>{Player.IsDead ? "💀 " + Player.Username : Player.Username}</span>
                                     </td>
                                     <td>{Player.IsDead ? "Is dead because they suck":"Is a stupid loser"}</td>
-                                    <td>{Player.lastRoundWPM}</td>
+                                    <td>{Player.WPM}</td>
                                 </tr>
                             ))}
                             </tbody>
