@@ -11,7 +11,7 @@ const WinnerView: React.FC<winnerViewProps> = ({gameState, setGameState, usernam
     const baseUrl: string = import.meta.env.VITE_Backend_URL
 
     const sortedPlayers = gameState.Players.sort((a, b) => {
-        return Number(a.Rank) - Number(b.Rank)
+        return Number(b.Rank) - Number(a.Rank)
     })
 
     return (
