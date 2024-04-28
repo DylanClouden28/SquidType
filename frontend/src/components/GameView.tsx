@@ -84,7 +84,7 @@ const GameView: React.FC<gameViewProps> = ({gameState, setGameState, username, s
         let leadUserTextLength = undefined
         if (sortedPlayers.length > 0){
             leadUser = sortedPlayers[0];
-            leadUserTextLength = gameState.TargetParagraph.length * Number(leadUser.CurrentPercentage) / 100;
+            leadUserTextLength = gameState.TargetParagraph.length * Number(leadUser.CurrentPercentage);
         }
         // console.log("Lead user lenth", leadUserTextLength)
         for (let i =0; i < gameState.TargetParagraph.length; i++){
@@ -170,7 +170,7 @@ const GameView: React.FC<gameViewProps> = ({gameState, setGameState, username, s
             {sortedPlayers.map((Player, index) => 
                 <div id={`progess_${Player.Username}`} className={index == 0 ? "flex flex-row bg-base-100 p-2 card m-0 tooltip tooltip-bottom col-span-3 " + `${Player.IsDead && "opacity-15"}` : "flex flex-row bg-base-100 p-2 card m-0 tooltip tooltip-bottom justify-start " + `${Player.IsDead && "opacity-15"}`} 
                 data-tip={
-                    gameState.TargetParagraph.slice(0, gameState.TargetParagraph.length * Number(Player.CurrentPercentage) / 100)
+                    gameState.TargetParagraph.slice(0, gameState.TargetParagraph.length * Number(Player.CurrentPercentage))
                     } >
                     <div className="avatar flex flex-col h-16 w-16">
                         <div className="rounded-full">
@@ -187,7 +187,7 @@ const GameView: React.FC<gameViewProps> = ({gameState, setGameState, username, s
                         <progress 
                         className={Player.IsDead ? "progress progress-error w-full h-5 transition-all duration-150 ease-in-out": 
                         "progress progress-success w-full h-5 transition-all duration-150 ease-in-out"} 
-                        value={Player.CurrentPercentage} max="100">     
+                        value={Number(Player.CurrentPercentage) * 100} max="100">     
                         </progress>
                     </div>
                     <div className="flex flex-col justify-center items-center">
@@ -201,7 +201,7 @@ const GameView: React.FC<gameViewProps> = ({gameState, setGameState, username, s
 
         {/* <button className="btn btn-primary" onClick={startCountDown}>Start CountDown</button> */}
         <audio id="gostart"><source src={goSound}></source></audio>
-        <audio id="lightChange"><source src={lightChangeSound}></source></audio>
+        <audio id="lightChange" volume><source src={lightChangeSound}></source></audio>
         <div className="z-0">
             {/* <Fireworks /> */}
         </div>
