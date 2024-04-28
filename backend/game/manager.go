@@ -170,9 +170,11 @@ func gameUpdateSender() {
 		}
 		update := gameUpdate{MessageType: "gameUpdate", Players: GameState.Players, CurrentLight: light, CurrentState: state, countDown: GameState.CountDown}
 		for i := 0; i < len(*update.Players); i++ {
-			words := (*update.Players)[i].CurrentPercentage * paragraphLen / 5.0
-			wpm := words / duration.Minutes()
-			(*update.Players)[i].WPM = int32(wpm)
+			if (*update.Players)[i].CurrentPercentage < .999999999 && !(*update.Players)[i].IsDead {
+				words := (*update.Players)[i].CurrentPercentage * paragraphLen / 5.0
+				wpm := words / duration.Minutes()
+				(*update.Players)[i].WPM = int32(wpm)
+			}
 		}
 		js, err := json.Marshal(update)
 		if err != nil {
