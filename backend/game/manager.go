@@ -18,6 +18,7 @@ type player struct {
 	Rank              int
 	isConn            bool
 	WPM               int32
+	isDone            bool
 }
 
 const (
@@ -56,7 +57,7 @@ type gameUpdate struct {
 	CurrentLight string    `json:"currentLight"`
 	MessageType  string    `json:"MessageType"`
 	CurrentState string    `json:"currentState"`
-	countDown    int
+	CountDown    int       `json:"countDown"`
 }
 
 type stateUpdate struct {
@@ -168,9 +169,11 @@ func gameUpdateSender() {
 		case BetweenRound:
 			state = "betweenRound"
 		}
-		update := gameUpdate{MessageType: "gameUpdate", Players: GameState.Players, CurrentLight: light, CurrentState: state, countDown: GameState.CountDown}
+		update := gameUpdate{MessageType: "gameUpdate", Players: GameState.Players, CurrentLight: light, CurrentState: state, CountDown: GameState.CountDown}
 		for i := 0; i < len(*update.Players); i++ {
-			if (*update.Players)[i].CurrentPercentage < .999999999 && !(*update.Players)[i].IsDead {
+			if (*update.Players)[i].CurrentPercentage < .999999999 {
+				(*update.Players)[i].isDone = true
+			} else if !(*update.Players)[i].IsDead {
 				words := (*update.Players)[i].CurrentPercentage * paragraphLen / 5.0
 				wpm := words / duration.Minutes()
 				(*update.Players)[i].WPM = int32(wpm)
@@ -195,6 +198,15 @@ func roundOverCheck() {
 	// Dead Target is how many need to die for the round to end
 	// if DeadTarget is 0 then the round ends when the game does
 	if GameState.DeadRound >= GameState.DeadTarget {
+		*isRoundOver = true
+	}
+	c := 0
+	for i := 0; i < len(*GameState.Players); i++ {
+		if (*GameState.Players)[i].isDone {
+			c++
+		}
+	}
+	if c >= GameState.DeadTarget {
 		*isRoundOver = true
 	}
 
@@ -242,7 +254,7 @@ func GameLoop() {
 		GameState.TargetMessage = "Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore culpa sint ad nisi Lorem pariatur mollit ex esse exercitation amet. Nisi anim cupidatat excepteur officia. Reprehenderit nostrud nostrud ipsum Lorem est aliquip amet voluptate voluptate dolor minim nulla est proident. Nostrud officia pariatur ut officia. Sit irure elit esse ea nulla sunt ex occaecat reprehenderit commodo officia dolor Lorem duis laboris cupidatat officia voluptate. Culpa proident adipisicing id nulla nisi laboris ex in Lorem sunt duis officia eiusmod. Aliqua reprehenderit commodo ex non excepteur duis sunt velit enim. Voluptate laboris sint cupidatat ullamco ut ea consectetur et est culpa et culpa duis."
 		for i := 0; i < 10; i++ {
 			GameState.CountDown = 10 - i
-			//time.Sleep(time.Second)
+			time.Sleep(time.Second)
 		}
 		GameState.currentState = Game
 		sendCurrentState()
