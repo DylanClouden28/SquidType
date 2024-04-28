@@ -228,6 +228,7 @@ function home(){
     useEffect(() => {
         if (document.getElementById("lightChange")){
             document.getElementById("lightChange").play();
+            document.getElementById("lightChange").volume = 0.1;
         }
     }, [gameState.currentLight])
 
