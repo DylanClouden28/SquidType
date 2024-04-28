@@ -4,17 +4,19 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	"regexp"
 	"sluggers/database"
 	"sluggers/models"
 
 	"crypto/rand"
 	"crypto/sha256"
 
+	"io"
+	"os"
+
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"golang.org/x/crypto/bcrypt"
-	"io"
-	"os"
 )
 
 func Route(router *gin.Engine) {
@@ -143,6 +145,15 @@ func register(c *gin.Context) {
 		return
 	}
 	newUser.Username = value.(string)
+	if matched, _ := regexp.MatchString(`^[a-zA-Z0-9]{1,15}$`, newUser.Username); !matched {
+		c.JSON(400, "Username can only be up to 15 characters and must be alphanumeric")
+		return
+	}
+	if matched, _ := regexp.MatchString(`^[a-zA-Z0-9!@#$%&\*\^\(\)\-\+]{1,15}$`, jsonData["password1"].(string)); !matched {
+		c.JSON(400, "Password can only be up to 15 characters")
+		return
+	}
+
 	filter := bson.D{{"username", newUser.Username}}
 	var existing_user models.User
 	exist := userCollection.FindOne(context.TODO(), filter).Decode(&existing_user)

@@ -22,104 +22,8 @@ const CONNECTION_STATUS_CLOSED: number  = 3;
 
 const enablePolling = false;
 
-// const mockPlayers: Player[] = [
-//     {
-//         Username: "Dylan",
-//         IsDead: true,
-//         CurrentPercentage: "90",
-//         isReady: false,
-//         WPM: 40,
-//         lastRoundWPM: 50,
-//     },
-//     {
-//         Username: "Joe",
-//         IsDead: false,
-//         CurrentPercentage: "70",
-//         isReady: false,
-//         WPM: 50,
-//         lastRoundWPM: 70,
-//     },
-//     {
-//         Username: "Steve",
-//         IsDead: false,
-//         CurrentPercentage: "56",
-//         isReady: false,
-//         WPM: 60,
-//         lastRoundWPM: 50,
-//     },
-//     {
-//         Username: "Steve",
-//         IsDead: false,
-//         CurrentPercentage: "34",
-//         isReady: false,
-//         WPM: 70,
-//         lastRoundWPM: 30,
-//     },
-//     {
-//         Username: "Steve",
-//         IsDead: false,
-//         CurrentPercentage: "33",
-//         isReady: false,
-//         WPM: 80,
-//         lastRoundWPM: 20,
-//     },
-//     {
-//         Username: "Bottom",
-//         IsDead: false,
-//         CurrentPercentage: "20",
-//         isReady: false,
-//         WPM: 90,
-//         lastRoundWPM: 10,
-//     },
-//     {
-//         Username: "Steve",
-//         IsDead: false,
-//         CurrentPercentage: "10",
-//         isReady: false,
-//         WPM: 70,
-//         lastRoundWPM: 30,
-//     },
-//     {
-//         Username: "Steve",
-//         IsDead: false,
-//         CurrentPercentage: "5",
-//         isReady: false,
-//         WPM: 80,
-//         lastRoundWPM: 20,
-//     },
-//     {
-//         Username: "Bottom",
-//         IsDead: false,
-//         CurrentPercentage: "67",
-//         isReady: false,
-//         WPM: 90,
-//         lastRoundWPM: 10,
-//     },
-//     {
-//         Username: "Steve",
-//         IsDead: false,
-//         CurrentPercentage: "7",
-//         isReady: false,
-//         WPM: 70,
-//         lastRoundWPM: 30,
-//     },
-//     {
-//         Username: "Steve",
-//         IsDead: false,
-//         CurrentPercentage: "80",
-//         isReady: false,
-//         WPM: 80,
-//         lastRoundWPM: 20,
-//     },
-//     {
-//         Username: "Bottom",
-//         IsDead: false,
-//         CurrentPercentage: "45",
-//         isReady: false,
-//         WPM: 90,
-//         lastRoundWPM: 10,
-//     },
-// ]
+const mockPlayers: Player[] = [
+]
 
 function home(){
     const baseUrl: string = import.meta.env.VITE_Backend_URL
@@ -171,13 +75,6 @@ function home(){
 
     const {sendMessage, lastMessage, readyState} = useWebSocket(baseWSUrl + '/ws/', options);
     
-    const connectionStatus = {
-        [CONNECTION_STATUS_CONNECTING]: 'Connecting',
-        [CONNECTION_STATUS_OPEN]: 'Open',
-        [CONNECTION_STATUS_CLOSING]: 'Closing',
-        [CONNECTION_STATUS_CLOSED]: 'Closed',
-      }[readyState];
-
     const addNewChatMessage = (message: ChatMessage) => {
         setMessages(prevMessages => {
             console.log("messages", messages)
@@ -218,13 +115,19 @@ function home(){
         
         try {
             const resultJson = JSON.parse(message);
+            let messageType = ""
             console.log("Recieved json over websocket:", resultJson)
-            if (resultJson.MessageType === undefined){
+            if (resultJson.MessageType === undefined && resultJson.messageType === undefined){
                 console.log("MessageType was no defined in websocket data");
                 return
             }
-            const messageType = resultJson.MessageType;
-
+            if (resultJson.MessageType){
+                messageType = resultJson.MessageType;
+            }
+            else{
+                messageType = resultJson.messageType;
+            }
+            console.log("Recieved messageType:", messageType)
             if (messageType == "chatMessage"){
                 const chatMess: chatWSMessage = resultJson;
                 console.log("Recvied chatMessage", chatMess)
@@ -238,6 +141,7 @@ function home(){
             }
 
             if (messageType == "pingMessage"){
+                console.log("Recieved ping message")
                 const Pong: baseWSMessage = {
                     messageType: "pongMessage"
                 }
@@ -246,6 +150,7 @@ function home(){
 
 
             if (messageType == "stateUpdate"){
+                console.log("Receving state Update")
                 if (resultJson.currentState === undefined){
                     return
                 }
@@ -265,6 +170,7 @@ function home(){
                         Players: newGameStateUpdate.players,
                         currentState: newGameStateUpdate.currentState,
                         TargetParagraph: newGameStateUpdate.targetMessage,
+                        currentParagraph: ""
                     }))
                     startCountDown();
                 }
@@ -299,12 +205,18 @@ function home(){
                 const newGameStateUpdate: overAllGameUpdate = resultJson;
                     
                 console.log("Recevied gameUpdate")
-                setGameState(prevState => ({
-                    ...prevState,
-                    Players: newGameStateUpdate.players,
-                    currentLight: newGameStateUpdate.currentLight as "red" | "green" | "yellow" | "off",
-                    currentState: newGameStateUpdate.currentState as 'lobby' | 'game' | 'winner' | 'betweenRound'
-                }))
+                // if (newGameStateUpdate.currentLight !== gameState.currentLight){
+                //     document.getElementById("lightChange").play();
+                // }
+                setGameState(prevState => {
+                
+                    return {
+                        ...prevState,
+                        Players: newGameStateUpdate.players,
+                        currentLight: newGameStateUpdate.currentLight as "red" | "green" | "yellow" | "off",
+                        currentState: newGameStateUpdate.currentState as 'lobby' | 'game' | 'winner' | 'betweenRound'
+                    }
+            })
             }
         }
         catch (error){
@@ -312,6 +224,13 @@ function home(){
         }
 
     }
+
+    useEffect(() => {
+        if (document.getElementById("lightChange")){
+            document.getElementById("lightChange").play();
+            document.getElementById("lightChange").volume = 0.1;
+        }
+    }, [gameState.currentLight])
 
     useEffect(() => {
         console.log("Game State has been updated: ", gameState)
@@ -402,9 +321,10 @@ function home(){
           const body = await response.json()
 
           setMessages(body);
-
-          const lastMessage = body[body.length - 1]
-          messageScroll(lastMessage.uuid)
+          setTimeout(()=> {
+              const lastMessage = body[body.length - 1]
+              messageScroll(lastMessage.uuid)
+          }, 200)
           console.log("The current messages are after fetching", messages)
         } catch (error){
             console.log(error)
@@ -496,6 +416,7 @@ function home(){
     }
 
     const startCountDown = () => {
+        console.log("Recieved message to start countdown")
         setCounter(10);
     
         const id = setInterval(() => {
@@ -524,7 +445,7 @@ function home(){
             </div>
             <div className='flex'>
                 <div className='w-2/3 h-fit'>
-                    {gameState &&  <Game gameState={gameState} setGameState={setGameState} username={username} sendMessage={sendMessage}/>}
+                    {gameState && readyState == CONNECTION_STATUS_OPEN  &&  <Game gameState={gameState} setGameState={setGameState} username={username} sendMessage={sendMessage}/>}
                 </div>
 
                 <div className="grid justify-items-center w-1/3 h-10">
