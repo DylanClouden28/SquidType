@@ -268,7 +268,8 @@ function home(){
                         ...prevState,
                         Players: newGameStateUpdate.players,
                         currentLight: newGameStateUpdate.currentLight as "red" | "green" | "yellow" | "off",
-                        currentState: newGameStateUpdate.currentState as 'lobby' | 'game' | 'winner' | 'betweenRound'
+                        currentState: newGameStateUpdate.currentState as 'lobby' | 'game' | 'winner' | 'betweenRound',
+                        countDown: newGameStateUpdate.countDown
                     }
             })
             }
