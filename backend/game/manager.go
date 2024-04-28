@@ -91,66 +91,66 @@ func incomingMessage(mess gameMessage, username string) {
 		(*GameState.Players)[j].Rank = GameState.Rank
 		GameState.Rank += 1
 		GameState.DeadRound += 1
-		return
-	}
-	completed := 0.0
-	if strings.HasPrefix(GameState.TargetMessage, mess.Typed) {
-		completed = float64(len(mess.Typed)) / float64(len(GameState.TargetMessage))
-	}
-	if (*GameState.Players)[j].CurrentPercentage < completed {
-		(*GameState.Players)[j].CurrentPercentage = completed
-	}
-	if completed > .999999999 {
-		(*GameState.Players)[j].isDone = true
-		if isOverCheck() && !GameState.GameOver {
-			// if this player finishes ends the round
-			// assign ranks to all user who die,
-			// and if its last round assign ordering for
-			// winners
-			playersToKill := GameState.DeadTarget - GameState.DeadRound
-			for ; playersToKill > 0; playersToKill-- {
-				lowest_complete := 1.0
-				kill := -1
-				for i := 0; i < len(*GameState.Players); i++ {
-					if !(*GameState.Players)[i].IsDead {
-						if (*GameState.Players)[i].CurrentPercentage < lowest_complete {
-							kill = i
-							lowest_complete = (*GameState.Players)[i].CurrentPercentage
-						}
-					}
-					if kill != -1 {
-						(*GameState.Players)[kill].IsDead = true
-						(*GameState.Players)[kill].Rank = GameState.Rank
-						fmt.Println("setting player %s to dead and assigning rank", (*GameState.Players)[kill].Username)
-						GameState.Rank += 1
-					}
-				}
-			}
-			fmt.Println("last round: ", GameState.LastRound)
-			if GameState.LastRound {
-				lowest := 1.0
-				lowestPlayer := -1
-				for {
-					for i := 0; i < len(*GameState.Players); i++ {
-						fmt.Println("user: %s is %s", (*GameState.Players)[i].Username, (*GameState.Players)[i].IsDead)
-						if (*GameState.Players)[i].CurrentPercentage <= lowest && !(*GameState.Players)[i].IsDead {
-							lowest = (*GameState.Players)[i].CurrentPercentage
-							lowestPlayer = i
-						}
-					}
-					if lowestPlayer == -1 {
-						break
-					}
-					(*GameState.Players)[lowestPlayer].Rank = GameState.Rank
-					(*GameState.Players)[lowestPlayer].IsDead = true
-					GameState.Rank++
-					fmt.Println("setting player %s to dead and assigning rank", (*GameState.Players)[lowestPlayer].Username)
-					lowest = 1.0
-					lowestPlayer = -1
-				}
-			}
-			GameState.GameOver = true
+	} else {
+		completed := 0.0
+		if strings.HasPrefix(GameState.TargetMessage, mess.Typed) {
+			completed = float64(len(mess.Typed)) / float64(len(GameState.TargetMessage))
 		}
+		if (*GameState.Players)[j].CurrentPercentage < completed {
+			(*GameState.Players)[j].CurrentPercentage = completed
+		}
+		if completed > .999999999 {
+			(*GameState.Players)[j].isDone = true
+		}
+	}
+	if isOverCheck() && !GameState.GameOver {
+		// if this player finishes ends the round
+		// assign ranks to all user who die,
+		// and if its last round assign ordering for
+		// winners
+		playersToKill := GameState.DeadTarget - GameState.DeadRound
+		for ; playersToKill > 0; playersToKill-- {
+			lowest_complete := 1.0
+			kill := -1
+			for i := 0; i < len(*GameState.Players); i++ {
+				if !(*GameState.Players)[i].IsDead {
+					if (*GameState.Players)[i].CurrentPercentage < lowest_complete {
+						kill = i
+						lowest_complete = (*GameState.Players)[i].CurrentPercentage
+					}
+				}
+				if kill != -1 {
+					(*GameState.Players)[kill].IsDead = true
+					(*GameState.Players)[kill].Rank = GameState.Rank
+					fmt.Println("setting player %s to dead and assigning rank", (*GameState.Players)[kill].Username)
+					GameState.Rank += 1
+				}
+			}
+		}
+		fmt.Println("last round: ", GameState.LastRound)
+		if GameState.LastRound {
+			lowest := 1.0
+			lowestPlayer := -1
+			for {
+				for i := 0; i < len(*GameState.Players); i++ {
+					fmt.Println("user: %s is %s", (*GameState.Players)[i].Username, (*GameState.Players)[i].IsDead)
+					if (*GameState.Players)[i].CurrentPercentage <= lowest && !(*GameState.Players)[i].IsDead {
+						lowest = (*GameState.Players)[i].CurrentPercentage
+						lowestPlayer = i
+					}
+				}
+				if lowestPlayer == -1 {
+					break
+				}
+				(*GameState.Players)[lowestPlayer].Rank = GameState.Rank
+				(*GameState.Players)[lowestPlayer].IsDead = true
+				GameState.Rank++
+				fmt.Println("setting player %s to dead and assigning rank", (*GameState.Players)[lowestPlayer].Username)
+				lowest = 1.0
+				lowestPlayer = -1
+			}
+		}
+		GameState.GameOver = true
 	}
 }
 
@@ -395,5 +395,8 @@ func GameLoop() {
 		SendAll([]byte(ping), backgroundContext)
 		GameState.currentState = Lobby
 		sendCurrentState()
+		for len(playersReady) > 0 {
+			<-playersReady
+		}
 	}
 }

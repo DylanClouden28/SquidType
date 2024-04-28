@@ -113,7 +113,8 @@ func websocketHandler(c *gin.Context) {
 	if GameState.currentState == Lobby {
 		*GameState.Players = append(*GameState.Players, newPlayer)
 	}
-	sendCurrentState()
+	//sendCurrentState()
+	sendCurrentStateOne(context, conn)
 
 	for {
 		var rawMess json.RawMessage
@@ -235,4 +236,26 @@ func SendAll(json []byte, context context.Context) {
 			fmt.Println(err)
 		}
 	}
+}
+func sendCurrentStateOne(ctx context.Context, client *websocket.Conn) {
+	state := ""
+	stateUpdateMessage := stateUpdate{Players: GameState.Players, MessageType: "stateUpdate"}
+	switch GameState.currentState {
+	case Lobby:
+		state = "lobby"
+	case Game:
+		state = "game"
+		stateUpdateMessage.TargetMessage = GameState.TargetMessage
+	case Winner:
+		state = "winner"
+	case BetweenRound:
+		state = "betweenRound"
+	}
+	stateUpdateMessage.CurrentState = state
+	js, err := json.Marshal(stateUpdateMessage)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	client.Write(ctx, websocket.MessageText, js)
 }
