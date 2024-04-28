@@ -204,14 +204,17 @@ func isGameOver() bool {
 	// returns true if there is 1 player alive
 	// otherwise false
 	winner := false
+	winning_player := 0
 	for i := 0; i < len(*GameState.Players); i++ {
 		if !(*GameState.Players)[i].IsDead {
 			if winner {
 				return false
 			}
+			winning_player = i
 			winner = true
 		}
 	}
+	(*GameState.Players)[winning_player].Rank = GameState.Rank
 	return true
 }
 
@@ -231,6 +234,7 @@ func GameLoop() {
 	for {
 		GameState.DeadRound = 0
 		GameState.DeadTarget = 0
+		GameState.Round = 0
 		<-playersReady
 		// TODO remove any pleyers from slice that are not connected
 		fmt.Println("players ready; starting game")
