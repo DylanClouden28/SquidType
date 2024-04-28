@@ -56,7 +56,7 @@ function home(){
         Players: [],
         currentLight: 'green',
         currentRound: 0,
-        currentState: 'betweenRound',
+        currentState: 'lobby',
         TargetParagraph: "",
         currentParagraph: "",
         countDown: 10,
@@ -75,13 +75,6 @@ function home(){
 
     const {sendMessage, lastMessage, readyState} = useWebSocket(baseWSUrl + '/ws/', options);
     
-    const connectionStatus = {
-        [CONNECTION_STATUS_CONNECTING]: 'Connecting',
-        [CONNECTION_STATUS_OPEN]: 'Open',
-        [CONNECTION_STATUS_CLOSING]: 'Closing',
-        [CONNECTION_STATUS_CLOSED]: 'Closed',
-      }[readyState];
-
     const addNewChatMessage = (message: ChatMessage) => {
         setMessages(prevMessages => {
             console.log("messages", messages)
@@ -157,6 +150,7 @@ function home(){
 
 
             if (messageType == "stateUpdate"){
+                console.log("Receving state Update")
                 if (resultJson.currentState === undefined){
                     return
                 }
@@ -421,6 +415,7 @@ function home(){
     }
 
     const startCountDown = () => {
+        console.log("Recieved message to start countdown")
         setCounter(10);
     
         const id = setInterval(() => {
@@ -449,7 +444,7 @@ function home(){
             </div>
             <div className='flex'>
                 <div className='w-2/3 h-fit'>
-                    {gameState &&  <Game gameState={gameState} setGameState={setGameState} username={username} sendMessage={sendMessage}/>}
+                    {gameState && readyState == CONNECTION_STATUS_OPEN  &&  <Game gameState={gameState} setGameState={setGameState} username={username} sendMessage={sendMessage}/>}
                 </div>
 
                 <div className="grid justify-items-center w-1/3 h-10">
