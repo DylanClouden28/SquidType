@@ -93,11 +93,9 @@ func incomingMessage(mess gameMessage, username string) {
 	completed := 0.0
 	if strings.HasPrefix(GameState.TargetMessage, mess.Typed) {
 		completed = float64(len(mess.Typed)) / float64(len(GameState.TargetMessage))
-		fmt.Println(completed)
 	}
 	if (*GameState.Players)[j].CurrentPercentage < completed {
 		(*GameState.Players)[j].CurrentPercentage = completed
-		fmt.Println((*GameState.Players)[j])
 	}
 }
 
@@ -229,6 +227,8 @@ func GameLoop() {
 	GameState.currentState = Lobby
 	go gameUpdateSender()
 	for {
+		GameState.DeadRound = 0
+		GameState.DeadTarget = 0
 		<-playersReady
 		// TODO remove any pleyers from slice that are not connected
 		fmt.Println("players ready; starting game")
@@ -256,6 +256,7 @@ func GameLoop() {
 		//
 		time.Sleep(time.Second * 10)
 		for !isGameOver() {
+			*isRoundOver = false
 			GameState.RoundDuration = time.Duration(0)
 			GameState.DeadRound = 0
 			GameState.DeadTarget = 0
