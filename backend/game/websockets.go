@@ -52,9 +52,7 @@ type readyMessage struct {
 
 type gameMessage struct {
 	MessageType string `json:"messageType"`
-	Data        struct {
-		Typed string `json:"typed"`
-	}
+	Typed       string `json:"typed"`
 }
 
 type pongMessage struct {

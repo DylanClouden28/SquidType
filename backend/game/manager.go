@@ -17,6 +17,7 @@ type player struct {
 	IsReady           bool
 	Rank              int
 	isConn            bool
+	WPM               int32
 }
 
 const (
@@ -34,19 +35,20 @@ const (
 )
 
 type gameState struct {
-	Players          *[]player
-	Round            int
-	CurrentLight     int
-	CurrentLightEnds time.Time
-	PreviousLightEnd time.Time
-	TargetMessage    string
-	currentState     int
-	DeadRound        int
-	DeadTarget       int
-	Rank             int
-	CountDown        int
-	Lock             sync.Mutex
-	Cond             *sync.Cond
+	Players           *[]player
+	Round             int
+	CurrentLight      int
+	CurrentLightStart time.Time
+	PreviousLightEnd  time.Time
+	TargetMessage     string
+	currentState      int
+	DeadRound         int
+	DeadTarget        int
+	Rank              int
+	CountDown         int
+	RoundDuration     time.Duration
+	Lock              sync.Mutex
+	Cond              *sync.Cond
 }
 
 type gameUpdate struct {
@@ -89,11 +91,13 @@ func incomingMessage(mess gameMessage, username string) {
 		return
 	}
 	completed := 0.0
-	if strings.HasPrefix(GameState.TargetMessage, mess.Data.Typed) {
-		completed = float64(len(mess.Data.Typed)) / float64(len(GameState.TargetMessage))
+	if strings.HasPrefix(GameState.TargetMessage, mess.Typed) {
+		completed = float64(len(mess.Typed)) / float64(len(GameState.TargetMessage))
+		fmt.Println(completed)
 	}
 	if (*GameState.Players)[j].CurrentPercentage < completed {
 		(*GameState.Players)[j].CurrentPercentage = completed
+		fmt.Println((*GameState.Players)[j])
 	}
 }
 
@@ -139,6 +143,11 @@ func sendCurrentState() {
 
 func gameUpdateSender() {
 	for {
+		duration := GameState.RoundDuration
+		if GameState.CurrentLight != Red {
+			duration += time.Now().Sub(GameState.CurrentLightStart)
+		}
+		paragraphLen := float64(len(GameState.TargetMessage))
 		light := ""
 		switch GameState.CurrentLight {
 		case Off:
@@ -162,6 +171,11 @@ func gameUpdateSender() {
 			state = "betweenRound"
 		}
 		update := gameUpdate{MessageType: "gameUpdate", Players: GameState.Players, CurrentLight: light, CurrentState: state, countDown: GameState.CountDown}
+		for i := 0; i < len(*update.Players); i++ {
+			words := (*update.Players)[i].CurrentPercentage * paragraphLen / 5.0
+			wpm := words / duration.Minutes()
+			(*update.Players)[i].WPM = int32(wpm)
+		}
 		js, err := json.Marshal(update)
 		if err != nil {
 			fmt.Println(err)
@@ -222,7 +236,7 @@ func GameLoop() {
 		GameState.TargetMessage = "Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore culpa sint ad nisi Lorem pariatur mollit ex esse exercitation amet. Nisi anim cupidatat excepteur officia. Reprehenderit nostrud nostrud ipsum Lorem est aliquip amet voluptate voluptate dolor minim nulla est proident. Nostrud officia pariatur ut officia. Sit irure elit esse ea nulla sunt ex occaecat reprehenderit commodo officia dolor Lorem duis laboris cupidatat officia voluptate. Culpa proident adipisicing id nulla nisi laboris ex in Lorem sunt duis officia eiusmod. Aliqua reprehenderit commodo ex non excepteur duis sunt velit enim. Voluptate laboris sint cupidatat ullamco ut ea consectetur et est culpa et culpa duis."
 		for i := 0; i < 10; i++ {
 			GameState.CountDown = 10 - i
-			time.Sleep(time.Second)
+			//time.Sleep(time.Second)
 		}
 		GameState.currentState = Game
 		sendCurrentState()
@@ -242,6 +256,7 @@ func GameLoop() {
 		//
 		time.Sleep(time.Second * 10)
 		for !isGameOver() {
+			GameState.RoundDuration = time.Duration(0)
 			GameState.DeadRound = 0
 			GameState.DeadTarget = 0
 			alive := 0
@@ -258,18 +273,21 @@ func GameLoop() {
 				GameState.CurrentLight = Green
 				fmt.Println("light is now: ", GameState.CurrentLight)
 				duration := time.Duration(rand.Intn(5)+5) * time.Second
-				GameState.CurrentLightEnds = time.Now().Add(time.Second * duration)
+				GameState.CurrentLightStart = time.Now()
 				time.Sleep(duration)
+				GameState.RoundDuration = GameState.RoundDuration + duration
+				GameState.CurrentLightStart = time.Now()
 				GameState.CurrentLight = Yellow
 				fmt.Println("light is now: ", GameState.CurrentLight)
 				duration = time.Duration(rand.Intn(4)+1) * time.Second
 				GameState.PreviousLightEnd = time.Now().Add(duration)
 				time.Sleep(duration)
+				GameState.RoundDuration = GameState.RoundDuration + duration
+				GameState.CurrentLightStart = time.Now()
 				GameState.CurrentLight = Red
 				fmt.Println("light is now: ", GameState.CurrentLight)
 				duration = time.Duration(rand.Intn(4)+1) * time.Second
 				time.Sleep(duration)
-				fmt.Println("waking up")
 			}
 			if isGameOver() {
 				break
