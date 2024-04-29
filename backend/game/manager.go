@@ -287,6 +287,8 @@ func GameLoop() {
 		GameState.DeadRound = 0
 		GameState.DeadTarget = 0
 		GameState.Round = 0
+		GameState.Rank = 0
+		GameState.GameOver = false
 		<-playersReady
 		// TODO remove any pleyers from slice that are not connected
 		fmt.Println("players ready; starting game")
