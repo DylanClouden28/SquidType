@@ -265,12 +265,16 @@ func isOverCheck() bool {
 		return true
 	}
 	c := 0
-	for i := 0; i < len(*GameState.Players); i++ {
+	lng := len(*GameState.Players)
+	for i := 0; i < lng; i++ {
 		if (*GameState.Players)[i].isDone {
 			c++
 		}
 	}
 	if c >= GameState.DeadTarget {
+		return true
+	}
+	if c >= 1 && GameState.LastRound {
 		return true
 	}
 	return false
