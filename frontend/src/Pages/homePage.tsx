@@ -472,7 +472,7 @@ function home(){
 
     const startCountDown = () => {
         console.log("Recieved message to start countdown")
-        setCounter(10);
+        setCounter(5);
     
         const id = setInterval(() => {
             setCounter((prevCount) => {
