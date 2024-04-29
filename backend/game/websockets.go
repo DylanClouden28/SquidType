@@ -79,13 +79,16 @@ func websocketHandler(c *gin.Context) {
 		fmt.Println("User tryed to connect to websocket was not logged in")
 		return
 	}
+	GameState.RWLock.RLock()
 	for i := 0; i < len(*GameState.Players); i++ {
 		if (*GameState.Players)[i].Username == username && (*GameState.Players)[i].isConn {
 			c.JSON(400, "user already logged in")
 			fmt.Println("user already logged in")
+			GameState.RWLock.RUnlock()
 			return
 		}
 	}
+	GameState.RWLock.RUnlock()
 
 	conn, err := websocket.Accept(c.Writer, c.Request, nil)
 	if err != nil {
@@ -95,6 +98,8 @@ func websocketHandler(c *gin.Context) {
 	}
 	Clients = append(Clients, conn)
 	defer func() {
+		GameState.RWLock.Lock()
+		defer GameState.RWLock.Unlock()
 		Clients = removeFromSlice(Clients, conn)
 		conn.Close(websocket.StatusNormalClosure, "bye bye")
 		size := len(*GameState.Players)
@@ -110,9 +115,11 @@ func websocketHandler(c *gin.Context) {
 		}
 	}()
 	newPlayer := player{Username: username, isConn: true}
+	GameState.RWLock.Lock()
 	if GameState.currentState == Lobby {
 		*GameState.Players = append(*GameState.Players, newPlayer)
 	}
+	GameState.RWLock.Unlock()
 	//sendCurrentState()
 	sendCurrentStateOne(context, conn)
 
@@ -194,15 +201,19 @@ func websocketHandler(c *gin.Context) {
 				continue
 			}
 			fmt.Println(len(*GameState.Players))
+			GameState.RWLock.Lock()
 			for i := 0; i < len(*GameState.Players); i++ {
 				if (*GameState.Players)[i].Username == username {
 					(*GameState.Players)[i].IsReady = ready.Data.IsReady
 				}
 			}
+			GameState.RWLock.Unlock()
 			IsGameReady()
 			continue
 		case "pongMessage":
+			GameState.RWLock.Lock()
 			*GameState.Players = append(*GameState.Players, newPlayer)
+			GameState.RWLock.Unlock()
 			continue
 		case "gameMessage":
 			var incMessage gameMessage
