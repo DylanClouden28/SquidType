@@ -247,7 +247,7 @@ func gameUpdateSender() {
 			SendAll(js, backgroundContext)
 		}
 		GameState.RWLock.RUnlock()
-		time.Sleep(500 * time.Millisecond)
+		time.Sleep(250 * time.Millisecond)
 	}
 }
 
