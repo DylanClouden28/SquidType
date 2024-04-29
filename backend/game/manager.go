@@ -397,7 +397,6 @@ func GameLoop() {
 				GameState.CurrentLightStart = time.Now()
 				GameState.CurrentLight = Red
 				GameState.RWLock.Unlock()
-				fmt.Println("light is now: ", GameState.CurrentLight)
 				duration = time.Duration(rand.Intn(4)+1) * time.Second
 				time.Sleep(duration)
 			}
@@ -426,9 +425,8 @@ func GameLoop() {
 			GameState.currentState = Game
 			GameState.TargetMessage = paragraphs[rand.Int31n(10)]
 			GameState.RWLock.Unlock()
-			time.Sleep(time.Second * 5)
 			sendCurrentState()
-			time.Sleep(time.Second)
+			time.Sleep(time.Second * 5)
 			alive = 0
 			GameState.RWLock.RLock()
 			for i := 0; i < len(*GameState.Players); i++ {
