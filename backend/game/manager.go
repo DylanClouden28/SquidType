@@ -159,16 +159,17 @@ var playersReady chan bool
 var backgroundContext context.Context
 
 func IsGameReady() {
-	GameState.RWLock.RLock()
-	defer GameState.RWLock.RUnlock()
+	fmt.Println("grabbing read lock")
 	c := 0
+	GameState.RWLock.RLock()
 	totalPlayers := len(*GameState.Players)
 	for i := 0; i < totalPlayers; i++ {
 		if (*GameState.Players)[i].IsReady {
 			c += 1
 		}
 	}
-	if totalPlayers <= c*2 {
+	GameState.RWLock.RUnlock()
+	if totalPlayers <= c*2 && totalPlayers >= 2 {
 		playersReady <- true
 	}
 }
