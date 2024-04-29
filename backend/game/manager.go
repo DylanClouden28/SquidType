@@ -1,10 +1,12 @@
 package game
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
 	"fmt"
 	"math/rand"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -114,6 +116,7 @@ func incomingMessage(mess gameMessage, username string) {
 		// and if its last round assign ordering for
 		// winners
 		playersToKill := GameState.DeadTarget - GameState.DeadRound
+		fmt.Println("players to kill: ", playersToKill)
 		for ; playersToKill > 0; playersToKill-- {
 			lowest_complete := 1.0
 			kill := -1
@@ -132,7 +135,7 @@ func incomingMessage(mess gameMessage, username string) {
 			}
 		}
 		if GameState.LastRound {
-			lowest := 1.0
+			lowest := 10.0
 			lowestPlayer := -1
 			for {
 				for i := 0; i < len(*GameState.Players); i++ {
@@ -150,8 +153,8 @@ func incomingMessage(mess gameMessage, username string) {
 				lowest = 1.0
 				lowestPlayer = -1
 			}
+			GameState.GameOver = true
 		}
-		GameState.GameOver = true
 	}
 }
 
@@ -202,7 +205,6 @@ func sendCurrentState() {
 func gameUpdateSender() {
 	for {
 		GameState.RWLock.RLock()
-		fmt.Println("sending out game update")
 		duration := GameState.RoundDuration
 		if GameState.CurrentLight != Red {
 			duration += time.Now().Sub(GameState.CurrentLightStart)
@@ -229,6 +231,7 @@ func gameUpdateSender() {
 			state = "winner"
 		case BetweenRound:
 			state = "betweenRound"
+			fmt.Println(GameState.CountDown)
 		}
 		update := gameUpdate{MessageType: "gameUpdate", Players: GameState.Players, CurrentLight: light, CurrentState: state, CountDown: GameState.CountDown}
 		for i := 0; i < len(*update.Players); i++ {
@@ -283,6 +286,19 @@ func GameLoop() {
 	backgroundContext = context.Background()
 	fmt.Println("starting gameplay loop, waiting for players to ready")
 	GameState.currentState = Lobby
+	texts, err := os.Open("target")
+	if err != nil {
+		fmt.Println("error opening", err)
+	}
+	defer texts.Close()
+	var paragraphs []string
+	scanner := bufio.NewScanner(texts)
+	for scanner.Scan() {
+		line := scanner.Text()
+		paragraphs = append(paragraphs, line)
+	}
+	fmt.Println("num paragraphs: ", len(paragraphs), paragraphs)
+
 	go gameUpdateSender()
 	for {
 		GameState.RWLock.Lock()
@@ -295,13 +311,14 @@ func GameLoop() {
 		GameState.Round = 0
 		GameState.Rank = 0
 		GameState.GameOver = false
+		GameState.LastRound = false
 		GameState.RWLock.Unlock()
 		<-playersReady
 		// TODO remove any pleyers from slice that are not connected
 		fmt.Println("players ready; starting game")
 		// waits for enough players to be readied up
 		GameState.RWLock.Lock()
-		GameState.TargetMessage = "Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore culpa sint ad nisi Lorem pariatur mollit ex esse exercitation amet. Nisi anim cupidatat excepteur officia. Reprehenderit nostrud nostrud ipsum Lorem est aliquip amet voluptate voluptate dolor minim nulla est proident. Nostrud officia pariatur ut officia. Sit irure elit esse ea nulla sunt ex occaecat reprehenderit commodo officia dolor Lorem duis laboris cupidatat officia voluptate. Culpa proident adipisicing id nulla nisi laboris ex in Lorem sunt duis officia eiusmod. Aliqua reprehenderit commodo ex non excepteur duis sunt velit enim. Voluptate laboris sint cupidatat ullamco ut ea consectetur et est culpa et culpa duis."
+		GameState.TargetMessage = paragraphs[rand.Int31n(10)]
 		GameState.RWLock.Unlock()
 		for i := 0; i < 10; i++ {
 			GameState.RWLock.Lock()
@@ -328,25 +345,27 @@ func GameLoop() {
 		// TODO generate target message in some way
 		// start := roundStart{MessageType: "roundStart", TargetMessage: GameState.TargetMessage}
 		//
-		time.Sleep(time.Second * 10)
-		alive := 0
-		GameState.RWLock.RLock()
-		for i := 0; i < len(*GameState.Players); i++ {
-			if !(*GameState.Players)[i].IsDead {
-				alive++
-			}
-		}
-		GameState.RWLock.RUnlock()
-		if alive <= 3 {
-			GameState.RWLock.Lock()
-			GameState.LastRound = true
-			GameState.RWLock.Unlock()
-		}
+		time.Sleep(time.Second * 5)
 		for {
 			GameState.RWLock.Lock()
-			GameState.RoundDuration = time.Duration(0)
 			GameState.DeadRound = 0
 			GameState.DeadTarget = 0
+			GameState.RWLock.Unlock()
+			alive := 0
+			GameState.RWLock.RLock()
+			for i := 0; i < len(*GameState.Players); i++ {
+				if !(*GameState.Players)[i].IsDead {
+					alive++
+				}
+			}
+			GameState.RWLock.RUnlock()
+			if alive <= 3 {
+				GameState.RWLock.Lock()
+				GameState.LastRound = true
+				GameState.RWLock.Unlock()
+			}
+			GameState.RWLock.Lock()
+			GameState.RoundDuration = time.Duration(0)
 			GameState.DeadTarget = ((alive - 1) / 2) + 1
 			GameState.RWLock.Unlock()
 			// runs as long as round is not over
@@ -397,18 +416,18 @@ func GameLoop() {
 				(*GameState.Players)[i].CurrentPercentage = 0.0
 			}
 			GameState.RWLock.Unlock()
-			time.Sleep(time.Second * 10)
-			GameState.RWLock.Lock()
-			GameState.currentState = Game
-			GameState.TargetMessage = "New Message Here"
-			GameState.RWLock.Unlock()
-			sendCurrentState()
 			for i := 0; i < 10; i++ {
 				GameState.RWLock.Lock()
 				GameState.CountDown = 9 - i
 				GameState.RWLock.Unlock()
 				time.Sleep(time.Second)
 			}
+			GameState.RWLock.Lock()
+			GameState.currentState = Game
+			GameState.TargetMessage = paragraphs[rand.Int31n(10)]
+			GameState.RWLock.Unlock()
+			time.Sleep(time.Second * 5)
+			sendCurrentState()
 			time.Sleep(time.Second)
 			alive = 0
 			GameState.RWLock.RLock()
