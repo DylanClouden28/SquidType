@@ -86,7 +86,7 @@ func incomingMessage(mess gameMessage, username string) {
 		return
 	}
 	if GameState.CurrentLight == Red {
-		fmt.Println("light is red, user typed in", GameState.PreviousLightEnd.Before(time.Now().Add(time.Millisecond*200)))
+		fmt.Println("light is red, user typed in", GameState.PreviousLightEnd.Before(time.Now().Add(time.Millisecond*250)))
 		fmt.Println(GameState.PreviousLightEnd, time.Now())
 	}
 	if GameState.CurrentLight == Red && GameState.PreviousLightEnd.Before(time.Now().Add(-time.Millisecond*200)) {
