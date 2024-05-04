@@ -361,6 +361,7 @@ func GameLoop() {
 				if !(*GameState.Players)[i].IsDead {
 					alive++
 				}
+				(*GameState.Players)[i].isDone = false
 			}
 			GameState.RWLock.RUnlock()
 			if alive <= 3 {
