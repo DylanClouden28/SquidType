@@ -3,25 +3,68 @@ package main
 import (
 	//"net/http"
 	"fmt"
+	"golang.org/x/time/rate"
 	"sluggers/controller"
 	"sluggers/game"
 	"sluggers/messages"
+	"sync"
 	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
+type RateLimiter struct {
+	limiter      *rate.Limiter
+	lastSeen     time.Time
+	blockedUntil time.Time
+}
+
+var clients = make(map[string]*RateLimiter)
+var mutex sync.Mutex
+
+func rateLimiter() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ip := c.GetHeader("X-Real-IP")
+		if ip == "" {
+			ip = c.ClientIP()
+		}
+		fmt.Println(ip)
+		mutex.Lock()
+		limiter, exists := clients[ip]
+		if !exists {
+			limiter = &RateLimiter{limiter: rate.NewLimiter(rate.Every(200*time.Millisecond), 50)}
+			clients[ip] = limiter
+		}
+		limiter.lastSeen = time.Now()
+		if time.Now().Before(limiter.blockedUntil) {
+			mutex.Unlock()
+			fmt.Println("429")
+			c.AbortWithStatusJSON(429, "Too Many Requests")
+			return
+		}
+		if !limiter.limiter.Allow() {
+			limiter.blockedUntil = time.Now().Add(30 * time.Second)
+			mutex.Unlock()
+			fmt.Println("429")
+			c.AbortWithStatusJSON(429, "Too Many Requests")
+			return
+		}
+		mutex.Unlock()
+		c.Next()
+	}
+}
+
 func NoSniff() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Writer.Header().Set("X-Content-Type-Options", "nosniff")
 		c.Next()
 	}
-
 }
 
 func main() {
 	r := gin.Default()
+	r.Use(rateLimiter())
 	r.Use(NoSniff())
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:8080", "http://localhost:5173"},
