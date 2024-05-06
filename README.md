@@ -14,9 +14,9 @@ In order to access and interact with our creative feature, a user must navigate 
 - Create two accounts in seperate browsers (e.g. firefox and chrome)
   - If the user is accessing the website for the first time or hasn't created an account yet, the user will be redirected to the login page, which allows you to register a new account or log into an existing one. Click the red "Sign Up!" button if you wish to sign up and register a new account on the website or simply log into an existing account if you have the login information.
 - Once the user clicks the green "Login" button and logs into an account using the proper credentials, they will be redirected to the website's home page where the featured game is displayed next to the chat room.
-- Start the game by clicking Ready on both browsers
-  - To access this game, since the game is meant to be competitive, at least two separate users will have to click the red "Not ready" button to change it to a green "Ready" button.
-  - Once two users are in the green "Ready" state, the countdown will begin.
+- Start the game by clicking Ready on only a single browser
+  - To access this game, since the game is meant to be competitive, at least one user will have to click the red "Not ready" button to change it to a green "Ready" button.
+  - Once one user is in the green "Ready" state, the countdown will begin.
 - When the countdown finishes. The game will begin
   - Typing in characters and spelling words correctly, or incorrectly, as displayed by the prompt will highlight the text in green or red (respectively) to show visual feedback on the progress the user has in completing the challenge.
 - Once game has started on one browser wait till the light turns red and beging typing
