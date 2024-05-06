@@ -5,6 +5,9 @@ CSE 312 Project for group "The Sluggers"
 # [SquidType](https://squidtype.me/)
 Server is being hosted from deploy branch
 
+# NOTE TO TA's for Objective 2: DoS Protection
+You have be logged in to active rate limiting and each refresh on the game page is only 4 requests per refresh to the backend. As the way we are using react and hosting the static files and there is no way to rate limit that unless we did that through ngninx. So you really have to spam to get 429
+
 # Project Part 3: Objective 3 (Creativity and Documentation)
 A feature of our design that was added to our web app is the typing game on the main page (the page that includes the chat room). This game has numerous features of creativity, some of which cover other Objectives for the project. An example of a feature that isn't a subset of other requirements is the actual typing aspect of the game. To be more specific, the game allows you to type and it checks whether your typing is correct based on the displayed characters and the user's input characters. The text of the prompt highlights green when the typing is correct and begins to highlight red when the typing is incorrect (even if the typing is correct again, it will still be highlighted red for previous spelling mistakes until they are fixed). This creative feature allows the web app to be more interactive and fun as it allows for real-time feedback through an addicting game loop. The ability to compete against other users in a battle of skill is an especially enticing and creative feature.
 
