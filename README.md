@@ -1,5 +1,5 @@
-# TheSluggers312Project
-CSE 312 Project for group "The Sluggers"
+# Squid Type
+An interactive multiplayer battle royal type racing game. You as the player must compete to finish first, while battling the chagning lights which are working against you in every step of the way. Built with golang (backend) + React (frontend) making use a websockets to manage game state
 
 # Our Website URL
 # [SquidType](https://squidtype.me/)
