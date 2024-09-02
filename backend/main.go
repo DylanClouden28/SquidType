@@ -29,7 +29,6 @@ func rateLimiter() gin.HandlerFunc {
 		if ip == "" {
 			ip = c.ClientIP()
 		}
-		fmt.Println(ip)
 		mutex.Lock()
 		limiter, exists := clients[ip]
 		if !exists {
@@ -37,17 +36,18 @@ func rateLimiter() gin.HandlerFunc {
 			clients[ip] = limiter
 		}
 		limiter.lastSeen = time.Now()
+		fmt.Println(limiter.limiter.Tokens())
 		if time.Now().Before(limiter.blockedUntil) {
 			mutex.Unlock()
 			fmt.Println("429")
-			c.AbortWithStatusJSON(429, "Too Many Requests")
+			c.JSON(429, "Too Many Requests")
 			return
 		}
 		if !limiter.limiter.Allow() {
 			limiter.blockedUntil = time.Now().Add(30 * time.Second)
 			mutex.Unlock()
 			fmt.Println("429")
-			c.AbortWithStatusJSON(429, "Too Many Requests")
+			c.JSON(429, "Too Many Requests")
 			return
 		}
 		mutex.Unlock()
